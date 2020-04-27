@@ -22,7 +22,6 @@ def get_app_from_desktop():
     path_desktop = "Apps/*/*.desktop"
     for file in glob.iglob(path_desktop):
         app = parse_desktop(file)
-        app['Exec'] = txt2fct(app['Exec'])
 
         category = file.split('/')[-2]
         app['category'] = category
@@ -56,6 +55,7 @@ def parse_desktop(file_name):
             k, v = [l.strip() for l in line.split('=')]
             app[k] = v
 
+    app['Exec'] = txt2fct(app['Exec'])
     return app
 
 

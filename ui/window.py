@@ -39,7 +39,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QPixmap, QIcon, QStaticText
 
-from parse_desktop_file import get_app_from_desktop # parse_desktop
+from parse_desktop_file import get_app_from_desktop, parse_desktop
 
 class MainWindow(QMainWindow):
 
@@ -108,6 +108,7 @@ class Tab(QWidget):
         super(QWidget, self).__init__()
         self.setAcceptDrops(True)
 
+        self.category = category
         self.layout = QGridLayout(self)
         Tab.instances[category] = self
         self.launcher_list = []
@@ -155,6 +156,15 @@ class Tab(QWidget):
     def dropEvent(self, e):
         print('drop')
         print(e.mimeData().text())
+        file_path = e.mimeData().text().split('//')[1:][0]
+        print('==========')
+        print(file_path)
+        app = parse_desktop(file_path)
+        file_name = file_path.split('/')[-1]
+        print('==========')
+        print(file_name)
+        os.system(f'cp {file_path} Apps/{self.category}/{file_name}')
+        self.addLauncher(app)
 
 
 class AppLauncherBtn(QWidget):
