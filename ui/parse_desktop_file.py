@@ -8,6 +8,10 @@ small desktop file parser
 import os
 import glob
 
+def get_app_for_folder():
+    pass
+
+
 def get_app_from_desktop():
     """
     get all app dict and store them in a list
@@ -15,10 +19,14 @@ def get_app_from_desktop():
 
     app_list = []
 
-    path_desktop = "/home/david/Programmation/Projets/PythonMenu/MyMenu/ui/*.desktop"
+    path_desktop = "Apps/*/*.desktop"
     for file in glob.iglob(path_desktop):
         app = parse_desktop(file)
         app['Exec'] = txt2fct(app['Exec'])
+
+        category = file.split('/')[-2]
+        app['category'] = category
+
         app_list += [app]
 
     return app_list
