@@ -92,7 +92,7 @@ class MyTableWidget(QWidget):
 
         for i, app in enumerate(app_list):
 
-            btn = AppLauncherBtn(self.tab1.layout, app, (i,1))
+            btn = AppLauncherBtn(self.tab1.layout, app, (1,i))
 
         self.tab1.setLayout(self.tab1.layout)
 
