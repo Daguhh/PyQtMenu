@@ -4,16 +4,9 @@
 
 """
 Project desciption
-"""
 
-__author__ = "Daguhh"
-__copyright__ = "Copyright 2020, The Daguhh Project"
-__credits__ = ["Daguhh"]
-__license__ = "GPL"
-__version__ = "1.0.1"
-__maintainer__ = "Daguhh"
-__email__ = "daguhh@daguhh.fr"
-__status__ = "Production"
+@Author = Daguhh
+"""
 
 import sys
 import os
@@ -45,7 +38,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.title = "DaguhhMenu"
+        self.title = "PyQtMenu"
         self.setWindowTitle(self.title)
 
         self.initUI()
@@ -63,20 +56,18 @@ class MainWindow(QMainWindow):
         fileMenu = menubar.addMenu('&File')
         fileMenu.addAction(exitAct)
 
-        # tab
-        self.table_widget = MyTableWidget(self)
+        # create tab
+        self.table_widget = TabsContainer(parent=self)
         self.setCentralWidget(self.table_widget)
 
         self.show()
 
 
-class MyTableWidget(QWidget):
+class TabsContainer(QWidget):
 
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
         self.layout = QVBoxLayout(self)
-        #grid = QGridLayout()
-        self.setLayout(self.layout)
 
         # Initialize tab screen
         self.tabs = QTabWidget()
@@ -85,14 +76,14 @@ class MyTableWidget(QWidget):
         # get all apps
         app_list = get_app_from_desktop()
 
-        # Create tabs
+        # Create tabs and give them a name
         categories = set([app['category'] for app in app_list])
         for category in categories:
             tab = Tab(category)
             name = category
             self.tabs.addTab(tab, name)
 
-        # Fill tabs with apps
+        # Fill tabs with apps with launchers
         for app in app_list:
             category = app['category']
             Tab.instances[category].addLauncher(app)
@@ -104,6 +95,7 @@ class MyTableWidget(QWidget):
 
 class Tab(QWidget):
     instances = {}
+
     def __init__(self, category):
         super(QWidget, self).__init__()
         self.setAcceptDrops(True)
@@ -154,15 +146,9 @@ class Tab(QWidget):
             e.ignore()
 
     def dropEvent(self, e):
-        print('drop')
-        print(e.mimeData().text())
         file_path = e.mimeData().text().split('//')[1:][0]
-        print('==========')
-        print(file_path)
         app = parse_desktop(file_path)
         file_name = file_path.split('/')[-1]
-        print('==========')
-        print(file_name)
         os.system(f'cp {file_path} Apps/{self.category}/{file_name}')
         self.addLauncher(app)
 

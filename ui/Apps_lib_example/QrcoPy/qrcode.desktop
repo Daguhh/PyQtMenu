@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=QrcoPy
+Type=Application
+Comment=instant grcode generation
+Exec=Apps_lib_example/QrcoPy/qrcopy
+TryExec=Apps_lib_example/QrcoPy/qrcopy
+Icon=Apps_lib_example/QrcoPy/qrcode.png
+Keywords=qrcode; python3;

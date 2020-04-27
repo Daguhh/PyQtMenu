@@ -1,8 +1,0 @@
-[Desktop Entry]
-Name=RofiCalculator
-Type=Application
-Comment=one line edition calculator with all numpy fonctions support
-Exec=/home/david/Programmation/Projets/RofiCalculator/rofi-python-calculator
-TryExec=/home/david/Programmation/Projets/RofiCalculator/rofi-python-calculator
-Icon=/home/david/Programmation/Projets/RofiCalculator/roficalculator.png
-Keywords=calculator; python3;

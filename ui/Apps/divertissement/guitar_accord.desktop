@@ -1,8 +1,0 @@
-[Desktop Entry]
-Name=ShowGuitarAccord
-Type=Application
-Comment=Display the guitar chord you choose
-Exec=/home/david/Programmation/Projets/ShowGuitarChords/show5
-TryExec=/home/david/Programmation/Projets/ShowGuitarChords/show5
-Icon=/home/david/Programmation/Projets/ShowGuitarChords/show_guitar_accord.png
-Keywords=guitar; python3;
