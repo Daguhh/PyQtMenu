@@ -18,6 +18,7 @@ __status__ = "Production"
 import sys
 import os
 from itertools import product
+import sip
 
 from PyQt5.QtCore import QSize
 from PyQt5.QtCore import Qt
@@ -79,12 +80,12 @@ class MyTableWidget(QWidget):
 
         # Initialize tab screen
         self.tabs = QTabWidget()
-        self.tabs.resize(300,200)
+        self.tabs.resize(600,400)
 
-        # Create first tab
+        # get all apps
         app_list = get_app_from_desktop()
 
-        # Create tab
+        # Create tabs
         categories = set([app['category'] for app in app_list])
         for category in categories:
             tab = Tab(category)
@@ -100,25 +101,25 @@ class MyTableWidget(QWidget):
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
 
-    def resizeEvent(self, event):
-        print("resize")
-        QMainWindow.resizeEvent(self, event)
 
 class Tab(QWidget):
     instances = {}
     def __init__(self, category):
         super(QWidget, self).__init__()
+        self.setAcceptDrops(True)
 
         self.layout = QGridLayout(self)
         Tab.instances[category] = self
         self.launcher_list = []
+        self.shape = (3,3)
         self.gen_position = self.genPos()
 
     def addLauncher(self, app):
         app['button'] = AppLauncherBtn(self.layout, app, next(self.gen_position))
-        self.launcher_list += app
+        self.launcher_list += [app]
 
     def genPos(self, shape=(3,3)):
+        self.shape = shape
         i = 0
         while i < shape[0] * shape[1]:
             x = i//shape[0]
@@ -127,13 +128,42 @@ class Tab(QWidget):
             yield (x, y)
             i += 1
 
+    def resizeEvent(self, event):
+
+        button_size = (120,180)
+
+        buttons_space_x = (button_size[0] + 10) * self.shape[0]
+        tab_x = self.size().width()
+
+        x = tab_x // (button_size[0] + 10)
+        y = self.shape[1]
+        if self.shape != (x,y):
+            self.gen_position = self.genPos((x, y))
+            for app in self.launcher_list:
+                self.layout.removeItem(app['button'].layout)
+            for app in self.launcher_list:
+                x, y = next(self.gen_position)
+                self.layout.addWidget(app['button'], x, y)
+
+    def dragEnterEvent(self, e):
+        print('drag')
+        if e.mimeData().hasFormat("text/uri-list"):
+            e.accept()
+        else:
+            e.ignore()
+
+    def dropEvent(self, e):
+        print('drop')
+        print(e.mimeData().text())
+
+
 class AppLauncherBtn(QWidget):
 
     def __init__(self, parent_tab, app, pos):
 
         super(QWidget, self).__init__()
 
-        layout = QVBoxLayout(self)
+        self.layout = QVBoxLayout(self)
         #layout.SetFixedSize = 120, 100
         self.setFixedSize(120,180)
 
@@ -144,17 +174,22 @@ class AppLauncherBtn(QWidget):
         btn = QPushButton('')
         btn.setIcon(QIcon(QPixmap(icon)))
         btn.setIconSize(QSize(100, 100))
-        layout.addWidget(btn)
+        self.layout.addWidget(btn)
         btn.setToolTip(tooltip)
         btn.clicked.connect(app['Exec'])
 
         txt = QLabel(name)
         txt.setAlignment(Qt.AlignHCenter)
-        layout.addWidget(txt)
+        self.layout.addWidget(txt)
 
-        self.setLayout(layout)
+        self.setLayout(self.layout)
 
         parent_tab.addWidget(self, *pos)
+
+    def remove(self):
+        self.layout.removeWidget(self.widget_name)
+        sip.delete(self.widget_name)
+        self.widget_name = None
 
 if __name__ == '__main__':
 
