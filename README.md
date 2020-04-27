@@ -1,5 +1,5 @@
 # PyQtMenu
-A menu PyQt5 to display my apps or any .desktop file
+A PyQt5 menu to display my apps or any .desktop file
 
 <img src="https://raw.githubusercontent.com/Daguhh/PyQtMenu/master/ui/Screenshot.png" width="600">
 
