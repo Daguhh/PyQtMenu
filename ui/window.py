@@ -65,7 +65,9 @@ class MainWindow(QMainWindow):
         # tab
         self.table_widget = MyTableWidget(self)
         self.setCentralWidget(self.table_widget)
+
         self.show()
+
 
 class MyTableWidget(QWidget):
 
@@ -82,24 +84,48 @@ class MyTableWidget(QWidget):
         # Create first tab
         app_list = get_app_from_desktop()
 
+        # Create tab
+        categories = set([app['category'] for app in app_list])
+        for category in categories:
+            tab = Tab(category)
+            name = category
+            self.tabs.addTab(tab, name)
 
-        category_tab_dct = {}
-        for i, app in enumerate(app_list):
+        # Fill tabs with apps
+        for app in app_list:
             category = app['category']
-            if not category in category_tab_dct.keys():
-                new_tab = QWidget()
-                new_tab.layout = QGridLayout(self)
-                category_tab_dct[app['category']] = new_tab
-                self.tabs.addTab(new_tab, app['category'])
-            btn = AppLauncherBtn(category_tab_dct[category].layout, app, (1,i))
-
-        #self.tab1.setLayout(self.tab1.layout)
-        for tab in category_tab_dct.values():
-            tab.setLayout(tab.layout)
+            Tab.instances[category].addLauncher(app)
 
         # Add tabs to widget
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
+
+    def resizeEvent(self, event):
+        print("resize")
+        QMainWindow.resizeEvent(self, event)
+
+class Tab(QWidget):
+    instances = {}
+    def __init__(self, category):
+        super(QWidget, self).__init__()
+
+        self.layout = QGridLayout(self)
+        Tab.instances[category] = self
+        self.launcher_list = []
+        self.gen_position = self.genPos()
+
+    def addLauncher(self, app):
+        app['button'] = AppLauncherBtn(self.layout, app, next(self.gen_position))
+        self.launcher_list += app
+
+    def genPos(self, shape=(3,3)):
+        i = 0
+        while i < shape[0] * shape[1]:
+            x = i//shape[0]
+            y = i%shape[0]
+            #print(f'position : {x},{y}')
+            yield (x, y)
+            i += 1
 
 class AppLauncherBtn(QWidget):
 
