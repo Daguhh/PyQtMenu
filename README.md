@@ -24,5 +24,5 @@ or drag 'n' drop it to the wanted category tab
 ### Usage
 Just run
 ```bash
-pyqtmenu
+./pyqtmenu
 ```
