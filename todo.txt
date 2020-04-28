@@ -1,0 +1,2 @@
+correct max launcher per tab
+better parser for .desktop
