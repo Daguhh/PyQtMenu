@@ -99,6 +99,9 @@ class TabsContainer(QWidget):
         self.setLayout(self.layout)
 
 class ScrollTab(QScrollArea):
+    """
+    Make tab vertically scrollable
+    """
 
     def __init__(self, category):
 
