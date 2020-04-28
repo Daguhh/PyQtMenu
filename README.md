@@ -6,6 +6,23 @@ A PyQt5 menu to display my apps or any .desktop file
 * Display desktop files into multiple tab, 
 * Drag'n'Drop desktop file to add it in menu
 
+### Add a launcher
+You should have a .desktop file with the following entries:
+```
+[Desktop Entry]
+Name=My_App_Name
+Comment=My App Description
+Exec=My/app/path/app.desktop
+Icon=My/icon/path/icon.png
+```
+Put il under 
+```
+Apps/your_catergory/app.desktop
+```
+or drag 'n' drop it to the wanted category tab
+
+### Usage
+Just run
 ```bash
-python3 window.py
+pyqtmenu
 ```
