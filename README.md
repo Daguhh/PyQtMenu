@@ -12,7 +12,7 @@ You should have a .desktop file with the following entries:
 [Desktop Entry]
 Name=My_App_Name
 Comment=My App Description
-Exec=My/app/path/app.desktop
+Exec=My/app/path/app
 Icon=My/icon/path/icon.png
 ```
 Put it under 
