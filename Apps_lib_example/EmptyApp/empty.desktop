@@ -1,8 +1,0 @@
-[Desktop Entry]
-Name=EmptyApp
-Type=Application
-Comment=this is not an app,\n this is an empty example
-Exec=Apps_lib_example/EmptyApp/empty
-TryExec=Apps_lib_example/EmptyApp/empty
-Icon=Apps_lib_example/EmptyApp/empty.png
-Keywords=None
