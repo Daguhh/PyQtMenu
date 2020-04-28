@@ -158,7 +158,7 @@ class Tab(QWidget):
         """
 
         i = 0
-        while i < shape[0] * shape[1]:
+        while i <= shape[0] * shape[1]:
             x = i//shape[0]
             y = i%shape[0]
             yield (x, y)
