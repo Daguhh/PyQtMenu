@@ -32,7 +32,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QPixmap, QIcon, QStaticText
 
-from parse_desktop_file import get_app_from_desktop, parse_desktop
+from .parse_desktop_file import get_app_from_desktop, parse_desktop
 
 class MainWindow(QMainWindow):
 
