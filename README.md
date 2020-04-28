@@ -15,9 +15,9 @@ Comment=My App Description
 Exec=My/app/path/app.desktop
 Icon=My/icon/path/icon.png
 ```
-Put il under 
+Put it under 
 ```
-Apps/your_catergory/app.desktop
+Apps/your_catergory/my_app.desktop
 ```
 or drag 'n' drop it to the wanted category tab
 
