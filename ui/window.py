@@ -127,6 +127,8 @@ class Tab(QWidget):
 
         self.setAcceptDrops(True)
 
+        # max launcher in 1 Tab
+
         # keep track of all created categories
         self.category = category
         Tab.instances[category] = self
@@ -136,18 +138,25 @@ class Tab(QWidget):
 
         # Init gris, its shape and a generator to fill it
         self.layout = QGridLayout(self)
-        self.shape = (3,3) # 3x3 squares
-        self.gen_position = self.genPos(self.shape)
+        #self.shape = (3,5) # 3x3 squares
+        self.width = 3
+        self.max_launcher = 12
+        self.gen_position = self.genPos()
+
+        self.launcher_size = (60,70)
+
+        self.setMinimumWidth(100)
 
     def addLauncher(self, app):
         """ create a button to launch app, store it as "button" key"""
 
         app['button'] = AppLauncherBtn(self.layout,
                                        app,
-                                       next(self.gen_position))
+                                       next(self.gen_position),
+                                       size = self.launcher_size)
         self.launcher_list += [app]
 
-    def genPos(self, shape=(3,3)):
+    def genPos(self):
         """
         Create a generator that return positions,
         line by line, to fill a 2-dimensions grid
@@ -158,30 +167,39 @@ class Tab(QWidget):
         """
 
         i = 0
-        while i <= shape[0] * shape[1]:
-            x = i//shape[0]
-            y = i%shape[0]
+        print('==================')
+        print(self.category)
+        while i <= self.max_launcher: #shape[0] * shape[1]:
+            print(i)
+            #print(shape)
+            x = i//self.width
+            y = i%self.width
+            print(x, y)
             yield (x, y)
             i += 1
 
     def resizeEvent(self, event):
         """ Modify grid shape as window is resized """
 
-        button_size = (120, 180)
+        button_size = (60, 70)
 
         #buttons_space_x = (button_size[0] + 10) * self.shape[0]
         tab_x = self.size().width()
 
-        x = tab_x // (button_size[0] + 10)
-        y = self.shape[1]
-        if self.shape != (x,y):
-            self.shape = (x,y)
-            self.gen_position = self.genPos(self.shape)
-            for app in self.launcher_list:
-                self.layout.removeItem(app['button'].layout)
-            for app in self.launcher_list:
-                x, y = next(self.gen_position)
-                self.layout.addWidget(app['button'], x, y)
+        new_width = tab_x // (button_size[0] + 10)
+        if self.width != new_width:
+            self.width = new_width
+            self.refresh()
+
+    def refresh(self):
+
+        self.gen_position = self.genPos()
+
+        for app in self.launcher_list:
+            self.layout.removeItem(app['button'].layout)
+        for app in self.launcher_list:
+            x, y = next(self.gen_position)
+            self.layout.addWidget(app['button'], x, y)
 
     def dragEnterEvent(self, e):
         """ A useless method """
@@ -202,24 +220,27 @@ class Tab(QWidget):
 
 class AppLauncherBtn(QWidget):
 
-    def __init__(self, parent_tab, app, pos):
+    def __init__(self, parent_tab, app, pos, size):
 
         super(QWidget, self).__init__()
 
         self.layout = QVBoxLayout(self)
+        self.size = size
         #layout.SetFixedSize = 120, 100
-        self.setFixedSize(120,180)
+        self.icon_size = (size[0], size[1] - 10)
+        self.setFixedSize(size[0], size[1])
+
 
         name = app['Name'] # 'qrcopy'
         icon = app['Icon'] # 'qrcode.png'
         tooltip = app['Comment'] #'generate a qr code'
 
-        btn = QPushButton('')
-        btn.setIcon(QIcon(QPixmap(icon)))
-        btn.setIconSize(QSize(100, 100))
-        self.layout.addWidget(btn)
-        btn.setToolTip(tooltip)
-        btn.clicked.connect(app['Exec'])
+        self.btn = QPushButton('')
+        self.btn.setIcon(QIcon(QPixmap(icon)))
+        self.btn.setIconSize(QSize(*self.icon_size))
+        self.layout.addWidget(self.btn)
+        self.btn.setToolTip(tooltip)
+        self.btn.clicked.connect(app['Exec'])
 
         txt = QLabel(name)
         txt.setAlignment(Qt.AlignHCenter)
