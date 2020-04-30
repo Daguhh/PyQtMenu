@@ -8,4 +8,7 @@
 * [ ] keyword search
 * [ ] create a profile?
 * [ ] dark/light mod
+* [ ] remove button border
+* [ ] resize text
+* [ ] resize icon with a slider / predifined values
 
