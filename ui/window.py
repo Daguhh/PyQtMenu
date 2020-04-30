@@ -16,6 +16,9 @@ import sip
 from PyQt5.QtCore import QSize
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
+    QInputDialog,
+    QDialog,
+    QLineEdit,
     QSpacerItem,
     QMainWindow,
     QScrollArea,
@@ -27,7 +30,6 @@ from PyQt5.QtWidgets import (
     QLabel,
     QApplication,
     QPushButton,
-    QLabel,
     QGridLayout,
     QTextEdit
 )
@@ -51,17 +53,70 @@ class MainWindow(QMainWindow):
         exitAct.setStatusTip('Exit application')
         exitAct.triggered.connect(QApplication.quit)
 
+        resizeiconAct = QAction(text='&Resize Icons', parent=self)
+        resizeiconAct.triggered.connect(self.resize_icons)
         self.statusBar()
 
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&File')
         fileMenu.addAction(exitAct)
+        fileMenu.addAction(resizeiconAct)
 
         # create tab
         self.table_widget = TabsContainer(parent=self)
         self.setCentralWidget(self.table_widget)
 
         self.show()
+
+    def get_size_value(self, *args):
+        dialog = AskMultipleValues(*args)
+        #dialog.exec_()
+        if dialog.exec_():
+            vals = dialog.get_values()
+        else:
+            vals = dialog.cancel()
+        return vals
+
+    def resize_icons(self):
+        x, y, test = self.get_size_value('x','y')
+        x, y = int(x), int(y)
+        if test:
+            for launcher in AppLauncherBtn.instances.values():
+                launcher.resize_icons(x, y)
+            for tab in Tab.instances.values():
+                tab.setMinimumWidth(int(x)+20)
+
+class AskMultipleValues(QDialog):
+
+    def __init__(self, *args, **kwargs):
+        super(QDialog, self).__init__()
+        self.layout = QGridLayout(self) #QVBoxLayout(self)
+        self.textEdits = []
+        for i, item in enumerate(args):
+            text = QLabel(item)
+            textEdit = QLineEdit()
+            self.textEdits.append(textEdit)
+            self.layout.addWidget(text, i, 0)
+            self.layout.addWidget(textEdit, i, 1, 1, 2)
+
+        ok_btn = QPushButton("Ok")
+        ok_btn.clicked.connect(self.accept)
+
+        cancel_btn = QPushButton("Cancel")
+        cancel_btn.clicked.connect(self.close)
+
+        self.layout.addWidget(cancel_btn, i+1, 1)
+        self.layout.addWidget(ok_btn, i+1, 2)
+
+    def get_values(self):
+        vals = []
+        for textEdit in self.textEdits:
+            vals.append(textEdit.text())
+
+        return *vals, True
+
+    def cancel(self):
+        return 0, 0, False
 
 
 class TabsContainer(QWidget):
@@ -143,9 +198,9 @@ class Tab(QWidget):
         self.max_launcher = 12
         self.gen_position = self.genPos()
 
-        self.launcher_size = (60,70)
+        self.launcher_size = (100,100)
 
-        self.setMinimumWidth(100)
+        self.setMinimumWidth((self.launcher_size[0]*1.3))
 
     def addLauncher(self, app):
         """ create a button to launch app, store it as "button" key"""
@@ -155,6 +210,8 @@ class Tab(QWidget):
                                        next(self.gen_position),
                                        size = self.launcher_size)
         self.launcher_list += [app]
+
+
 
     def genPos(self):
         """
@@ -181,12 +238,12 @@ class Tab(QWidget):
     def resizeEvent(self, event):
         """ Modify grid shape as window is resized """
 
-        button_size = (60, 70)
+        #button_size = (60, 70)
 
         #buttons_space_x = (button_size[0] + 10) * self.shape[0]
         tab_x = self.size().width()
 
-        new_width = tab_x // (button_size[0] + 10)
+        new_width = tab_x // self.launcher_size[0]
         if self.width != new_width:
             self.width = new_width
             self.refresh()
@@ -219,6 +276,7 @@ class Tab(QWidget):
 
 
 class AppLauncherBtn(QWidget):
+    instances = {}
 
     def __init__(self, parent_tab, app, pos, size):
 
@@ -227,8 +285,8 @@ class AppLauncherBtn(QWidget):
         self.layout = QVBoxLayout(self)
         self.size = size
         #layout.SetFixedSize = 120, 100
-        self.icon_size = (size[0], size[1] - 10)
-        self.setFixedSize(size[0], size[1])
+        self.icon_size = (int(size[0]), int(size[1]))
+        self.setFixedSize(size[0]+20, size[1]+35)
 
 
         name = app['Name'] # 'qrcopy'
@@ -250,10 +308,16 @@ class AppLauncherBtn(QWidget):
 
         parent_tab.addWidget(self, *pos)
 
+        AppLauncherBtn.instances[name] = self
+
     def remove(self):
         self.layout.removeWidget(self.widget_name)
         sip.delete(self.widget_name)
         self.widget_name = None
+
+    def resize_icons(self, size_x, size_y):
+        self.setFixedSize(size_x+20, size_y+35)
+        self.btn.setIconSize(QSize(size_x, size_y))
 
 if __name__ == '__main__':
 

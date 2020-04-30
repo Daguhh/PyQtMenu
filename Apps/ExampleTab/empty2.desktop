@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=EmptyApp
+Name=EmptyApp2
 Type=Application
 Comment=this is not an app,\n this is an empty example
 Exec=Apps_example/EmptyApp/empty
