@@ -35,7 +35,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QPixmap, QIcon, QStaticText
 
-from .parse_desktop_file import get_app_from_desktop, parse_desktop
+from .parse_desktop_file import get_app_from_desktop, parse_desktop_lang
 
 class MainWindow(QMainWindow):
 
@@ -269,7 +269,7 @@ class Tab(QWidget):
     def dropEvent(self, e):
         """ As desktop file is dropped on a tab, create a new launcher """
         file_path = e.mimeData().text().split('//')[1:][0]
-        app = parse_desktop(file_path)
+        app = parse_desktop_lang(file_path)
         file_name = file_path.split('/')[-1]
         os.system(f'cp {file_path} Apps/{self.category}/{file_name}')
         self.addLauncher(app)

@@ -7,6 +7,7 @@ small desktop file parser
 
 import os
 import glob
+import re
 
 def get_app_for_folder():
     pass
@@ -21,7 +22,7 @@ def get_app_from_desktop():
 
     path_desktop = "Apps/*/*.desktop"
     for file in glob.iglob(path_desktop):
-        app = parse_desktop(file)
+        app = parse_desktop_lang(file)
 
         category = file.split('/')[-2]
         app['category'] = category
@@ -37,6 +38,80 @@ def txt2fct(command_path):
         os.system(command_path)
     return exec
 
+def find_path(name, path):
+    print('=================')
+    print(name)
+    for root, dirs, files in os.walk(path):
+        print(files)
+
+        if name+'.png' in files:
+            temp =  os.path.join(root, name)
+            print('t', temp)
+            return temp
+
+def icon2path(icon):
+    print('-------------------')
+    print(icon)
+    if re.search('\.', icon):
+        print('yes')
+        return icon
+    else:
+        print('non')
+        icon = find_path(icon, '/usr/share/icons/hicolor/64x64')
+        print(icon)
+        return icon
+
+def create_pattern(entry, lang=None):
+    if lang != None:
+        pattern = re.compile(f'^{entry}\[{lang}\]=.*')
+    else:
+        pattern = re.compile(f'^{entry}=.*')
+    return pattern
+
+def find_in_file(file, pattern):
+    match = None
+    with open(file) as f:
+        for line in f:
+            temp = pattern.match(line)
+            if temp != None:
+                match = temp.string.replace("\n", "").split('=')[-1]
+                break
+    return match
+
+def parse_desktop_lang(file_name, lang='fr'):
+    """
+    parse_desktop("fichier.desktop") => dict
+
+    args:
+        str : desktop file following freedesktop guidelines
+    return:
+        dict : parsed desktop file into dict
+    """
+
+    entry_names_tr = ['Name', 'Comment']
+    entry_names = ['Exec', 'Icon']
+
+    app = {}
+    for name in entry_names_tr:
+        pattern = create_pattern(name, lang)
+        match = find_in_file(file_name, pattern)
+
+        if match == None:
+            pattern = create_pattern(name)
+            match = find_in_file(file_name, pattern)
+
+        app[name] = match
+
+    for name in entry_names:
+        pattern = create_pattern(name)
+        match = find_in_file(file_name, pattern)
+
+        app[name] = match
+
+
+    app['Exec'] = txt2fct(app['Exec'])
+    app['Icon'] = icon2path(app['Icon'])
+    return app
 
 def parse_desktop(file_name):
     """
@@ -48,6 +123,10 @@ def parse_desktop(file_name):
         dict : parsed desktop file into dict
     """
 
+    entries = ['Name', 'Comment', 'Exec', 'Icon']
+
+    Name = re.match(f'Name\[{lang}\]')
+    print(Name)
     app = {}
     with open(file_name, 'r') as file:
         next(file) # forget first line
@@ -70,12 +149,6 @@ if __name__ == "__main__":
     print(app_list)
     print('=================')
     print(app_list[0])
-
-
-
-
-
-
 
 
 
