@@ -38,27 +38,11 @@ def txt2fct(command_path):
         os.system(command_path)
     return exec
 
-def find_path(name, path):
-    print('=================')
-    print(name)
-    for root, dirs, files in os.walk(path):
-        print(files)
-
-        if name+'.png' in files:
-            temp =  os.path.join(root, name)
-            print('t', temp)
-            return temp
-
 def icon2path(icon):
-    print('-------------------')
-    print(icon)
     if re.search('\.', icon):
-        print('yes')
         return icon
     else:
-        print('non')
-        icon = find_path(icon, '/usr/share/icons/hicolor/64x64')
-        print(icon)
+        icon = glob.glob(f'/usr/share/icons/hicolor/128x128/*/{icon}.*')[0]
         return icon
 
 def create_pattern(entry, lang=None):
@@ -126,7 +110,6 @@ def parse_desktop(file_name):
     entries = ['Name', 'Comment', 'Exec', 'Icon']
 
     Name = re.match(f'Name\[{lang}\]')
-    print(Name)
     app = {}
     with open(file_name, 'r') as file:
         next(file) # forget first line
@@ -140,15 +123,9 @@ def parse_desktop(file_name):
 
 if __name__ == "__main__":
     app = parse_desktop("qrcode.desktop")
-    #print(app)
     for k,v in app.items():
-        print(k,v)
 
-    print('=================')
     app_list = get_app_from_desktop()
-    print(app_list)
-    print('=================')
-    print(app_list[0])
 
 
 

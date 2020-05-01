@@ -224,14 +224,9 @@ class Tab(QWidget):
         """
 
         i = 0
-        print('==================')
-        print(self.category)
         while i <= self.max_launcher: #shape[0] * shape[1]:
-            print(i)
-            #print(shape)
             x = i//self.width
             y = i%self.width
-            print(x, y)
             yield (x, y)
             i += 1
 
@@ -260,7 +255,6 @@ class Tab(QWidget):
 
     def dragEnterEvent(self, e):
         """ A useless method """
-        print('drag')
         if e.mimeData().hasFormat("text/uri-list"):
             e.accept()
         else:
