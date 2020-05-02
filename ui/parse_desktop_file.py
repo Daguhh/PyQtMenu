@@ -124,7 +124,7 @@ def parse_desktop(file_name):
 if __name__ == "__main__":
     app = parse_desktop("qrcode.desktop")
     for k,v in app.items():
-
+        pass
     app_list = get_app_from_desktop()
 
 

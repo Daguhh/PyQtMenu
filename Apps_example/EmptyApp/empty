@@ -1,30 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""
-"""
-
 import sys
-from PyQt5.QtWidgets import QWidget, QPushButton, QApplication
+from PyQt5.QtWidgets import QApplication
 
-class Example(QWidget):
-    
-    def __init__(self):
-        super(QWidget, self).__init__()
+from app.empty import Example
 
-        self.setWindowTitle('Useless app')    
-        self.initUI()
-        
-    def initUI(self):               
-        
-        btn = QPushButton('Quit', self)
-        btn.clicked.connect(QApplication.instance().quit)
-        btn.resize(btn.sizeHint())
-        
-        self.setGeometry(300, 300, 250, 150)
-        self.show()
-        
-        
 if __name__ == '__main__':
     
     app = QApplication(sys.argv)
