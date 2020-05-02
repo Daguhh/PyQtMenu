@@ -1,0 +1,2 @@
+python_rofi==1.0.1
+numpy==1.17.4
