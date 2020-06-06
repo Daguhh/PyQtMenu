@@ -34,6 +34,7 @@ from PyQt5.QtWidgets import (
     QTextEdit
 )
 from PyQt5.QtGui import QPixmap, QIcon, QStaticText
+from PyQt5.QtCore import QThreadPool, QRunnable, pyqtSlot
 
 from .parse_desktop_file import get_app_from_desktop, parse_desktop_lang
 
@@ -292,7 +293,11 @@ class AppLauncherBtn(QWidget):
         self.btn.setIconSize(QSize(*self.icon_size))
         self.layout.addWidget(self.btn)
         self.btn.setToolTip(tooltip)
-        self.btn.clicked.connect(app['Exec'])
+
+        self.threadpool = QThreadPool()
+        #self.btn.clicked.connect(app['Exec'])
+        self.app_command = app['Exec']
+        self.btn.clicked.connect(self.run_app)
 
         txt = QLabel(name)
         txt.setAlignment(Qt.AlignHCenter)
@@ -304,6 +309,11 @@ class AppLauncherBtn(QWidget):
 
         AppLauncherBtn.instances[name] = self
 
+    def run_app(self):
+
+        app_runner = AppRunner(self.app_command)
+        self.threadpool.start(app_runner)
+
     def remove(self):
         self.layout.removeWidget(self.widget_name)
         sip.delete(self.widget_name)
@@ -312,6 +322,25 @@ class AppLauncherBtn(QWidget):
     def resize_icons(self, size_x, size_y):
         self.setFixedSize(size_x+20, size_y+35)
         self.btn.setIconSize(QSize(size_x, size_y))
+
+class AppRunner(QRunnable):
+    '''
+    Run app in a thread
+    '''
+
+    def __init__(self, app_command):
+
+        super(AppRunner, self).__init__()
+        self.command = app_command
+
+    @pyqtSlot()
+    def run(self):
+        '''
+        Your code goes in this function
+        '''
+        print("Thread start")
+        self.command()
+        print("Thread complete")
 
 if __name__ == '__main__':
 
