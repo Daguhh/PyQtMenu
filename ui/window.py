@@ -85,6 +85,7 @@ class MainWindow(QMainWindow):
             for launcher in AppLauncherBtn.instances.values():
                 launcher.resize_icons(x, y)
             for tab in Tab.instances.values():
+                tab.launcher_size = (x, y)
                 tab.setMinimumWidth(int(x)+20)
 
 class AskMultipleValues(QDialog):
