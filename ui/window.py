@@ -115,7 +115,7 @@ class AskMultipleValues(QDialog):
         for textEdit in self.textEdits:
             vals.append(textEdit.text())
 
-        return *vals, True
+        return (*vals, True)
 
     def cancel(self):
         return 0, 0, False
