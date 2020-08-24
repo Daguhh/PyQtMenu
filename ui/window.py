@@ -36,7 +36,7 @@ from PyQt5.QtWidgets import (
     QSizePolicy,
     QGraphicsOpacityEffect
 )
-from PyQt5.QtGui import QPixmap, QIcon, QStaticText, QColor
+from PyQt5.QtGui import QPixmap, QIcon, QStaticText, QColor, QFont
 from PyQt5.QtCore import QThreadPool, QRunnable, pyqtSlot
 
 from .parse_desktop_file import get_app_from_desktop, parse_desktop_lang
@@ -133,7 +133,7 @@ class ReduceModButton(QDialog):
         reopen_button.setGeometry(0, 0, 100, 100)
         reopen_button.setStatusTip("Afficher le menu en plein écran")
         reopen_button.clicked.connect(self.accept)
-        self.setGeometry(0,0,200,200)
+        self.setGeometry(0,0,150,150)
         #bottomright_pos = QApplication.desktop().availableGeometry().bottomRight()
         dialog_size = self.geometry().getRect()
         desktop_size = QApplication.desktop().screenGeometry().getRect()
@@ -141,6 +141,7 @@ class ReduceModButton(QDialog):
         self.move(x,y)
         reopen_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         reopen_button.setStyleSheet("background-color:rgba(55,55,55,15);")#setPalette().setColo(QColor(0,0,0,20))
+        reopen_button.setFont(QFont('Times', 48))
         #reopen_button.setPalette(
 
         #rightpoint = QDesktopWidget().availableGeometry().bottomRight()
