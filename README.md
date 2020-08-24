@@ -6,6 +6,9 @@ A PyQt5 menu to display my apps or any .desktop file
 * Display desktop files into multiple tab, 
 * Drag'n'Drop desktop file to add it in menu
 
+new :
+* Reduce mode : reduce launcher to a small floating button at application lauch
+
 ### Add a launcher
 You should have a .desktop file with the following entries:
 ```
