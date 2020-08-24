@@ -50,6 +50,14 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.title = "PyQtMenu"
         self.setWindowTitle(self.title)
+        #self.setStyleSheet("""
+        #QWidget {
+        #
+        #    border: 20px solid black;
+        #    border-radius: 10px;
+        #    background-color: rgb(255, 255, 255);
+        #    }
+        #""")
 
         MainWindow.instance = self
 
@@ -152,6 +160,9 @@ class ReduceModButton(QDialog):
         op.setOpacity(0.5) #0 to 1 will cause the fade effect to kick in
         self.setGraphicsEffect(op)
         self.setAutoFillBackground(True)
+
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setWindowFlags(Qt.FramelessWindowHint)
         #self.move(rightpoint)
 
 class AskMultipleValues(QDialog):
