@@ -31,19 +31,27 @@ from PyQt5.QtWidgets import (
     QApplication,
     QPushButton,
     QGridLayout,
-    QTextEdit
+    QTextEdit,
+    QDesktopWidget,
+    QSizePolicy,
+    QGraphicsOpacityEffect
 )
-from PyQt5.QtGui import QPixmap, QIcon, QStaticText
+from PyQt5.QtGui import QPixmap, QIcon, QStaticText, QColor
 from PyQt5.QtCore import QThreadPool, QRunnable, pyqtSlot
 
 from .parse_desktop_file import get_app_from_desktop, parse_desktop_lang
 
 class MainWindow(QMainWindow):
 
+    #bigpicture = True
+    instance = None
+
     def __init__(self):
         super().__init__()
         self.title = "PyQtMenu"
         self.setWindowTitle(self.title)
+
+        MainWindow.instance = self
 
         self.initUI()
 
@@ -58,10 +66,17 @@ class MainWindow(QMainWindow):
         resizeiconAct.triggered.connect(self.resize_icons)
         self.statusBar()
 
+        self.reducemodAct = QAction('Masquer', self, checkable=True)
+        self.reducemodAct.setStatusTip("Cache le menu au lancement d'une application")
+        self.reducemodAct.setChecked(True)
+    #    reducemodAct.triggered.connect(MainWindow.toggle_bigpicture)
+
         menubar = self.menuBar()
-        fileMenu = menubar.addMenu('&File')
+        fileMenu = menubar.addMenu('&Fichier')
         fileMenu.addAction(exitAct)
-        fileMenu.addAction(resizeiconAct)
+        EditMenu = menubar.addMenu('&Edition')
+        EditMenu.addAction(resizeiconAct)
+        EditMenu.addAction(self.reducemodAct)
 
         # create tab
         self.table_widget = TabsContainer(parent=self)
@@ -78,6 +93,26 @@ class MainWindow(QMainWindow):
             vals = dialog.cancel()
         return vals
 
+#    @classmethod
+#    def toggle_bigpicture(cls):
+#        print('enable bigpiture')
+#        cls.bigpicture = not cls.bigpicture
+
+    @classmethod
+    def reduce_mainwindow(cls):
+        if cls.instance.reducemodAct.isChecked() == False:
+            return
+        dialog = ReduceModButton()
+        MainWindow.instance.hide()
+        #self.hide()
+        if dialog.exec_():
+            vals = dialog.accept()
+            cls.instance.show()
+        else:
+            vals = dialog.cancel()
+        return
+
+
     def resize_icons(self):
         x, y, test = self.get_size_value('x','y')
         x, y = int(x), int(y)
@@ -88,7 +123,38 @@ class MainWindow(QMainWindow):
                 tab.launcher_size = (x, y)
                 tab.setMinimumWidth(int(x)+20)
 
+class ReduceModButton(QDialog):
+    """ button that reopen main window """
+
+    def __init__(self):
+        super(QDialog, self).__init__()
+        self.layout = QGridLayout(self) #QVBoxLayout(self)
+        reopen_button = QPushButton("M")
+        reopen_button.setGeometry(0, 0, 100, 100)
+        reopen_button.setStatusTip("Afficher le menu en plein écran")
+        reopen_button.clicked.connect(self.accept)
+        self.setGeometry(0,0,200,200)
+        #bottomright_pos = QApplication.desktop().availableGeometry().bottomRight()
+        dialog_size = self.geometry().getRect()
+        desktop_size = QApplication.desktop().screenGeometry().getRect()
+        *_ ,x, y = map(lambda x,y : y -x - 30, dialog_size, desktop_size)
+        self.move(x,y)
+        reopen_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        reopen_button.setStyleSheet("background-color:rgba(55,55,55,15);")#setPalette().setColo(QColor(0,0,0,20))
+        #reopen_button.setPalette(
+
+        #rightpoint = QDesktopWidget().availableGeometry().bottomRight()
+
+        self.layout.addWidget(reopen_button)
+#        self.setWindowOpacity(10)
+        op=QGraphicsOpacityEffect(self)
+        op.setOpacity(0.5) #0 to 1 will cause the fade effect to kick in
+        self.setGraphicsEffect(op)
+        self.setAutoFillBackground(True)
+        #self.move(rightpoint)
+
 class AskMultipleValues(QDialog):
+    """ Dialog to resize icon """
 
     def __init__(self, *args, **kwargs):
         super(QDialog, self).__init__()
@@ -109,6 +175,12 @@ class AskMultipleValues(QDialog):
 
         self.layout.addWidget(cancel_btn, i+1, 1)
         self.layout.addWidget(ok_btn, i+1, 2)
+
+    def keyPressEvent(self, e):
+        if e.key() == Qt.Key_Return:
+            self.accept()
+        elif e.key() == Qt.Key_Escape:
+            self.close()
 
     def get_values(self):
         vals = []
@@ -314,6 +386,7 @@ class AppLauncherBtn(QWidget):
 
         app_runner = AppRunner(self.app_command)
         self.threadpool.start(app_runner)
+        MainWindow.reduce_mainwindow()
 
     def remove(self):
         self.layout.removeWidget(self.widget_name)
