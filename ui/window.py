@@ -65,6 +65,7 @@ class MainWindow(QMainWindow):
 
     def initUI(self):
 
+        ######## Menubar ############
         exitAct = QAction(text='&Exit', parent=self)
         exitAct.setShortcut('Ctrl+Q')
         exitAct.setStatusTip('Exit application')
@@ -86,9 +87,37 @@ class MainWindow(QMainWindow):
         EditMenu.addAction(resizeiconAct)
         EditMenu.addAction(self.reducemodAct)
 
+
+        ######## control panel ############
+        window = QWidget()
+        self.setCentralWidget(window)
+
+        reduceBtn = QPushButton("M")
+        #reduceBtn.setGeometry(0, 0, 200, 200)
+        reduceBtn.setFixedSize(100,100)
+        reduceBtn.setToolTip("Réduire le menu")
+        reduceBtn.setFont(QFont('Times', 80))
+        reduceBtn.clicked.connect(MainWindow.reduce_mainwindow)
+        cancelButton = QPushButton("Cancel")
+
+        hbox = QHBoxLayout()
+        #hbox.addStretch(1)
+        hbox.addWidget(reduceBtn)
+        hbox.addWidget(cancelButton)
+
+        vbox = QVBoxLayout()
+#        vbox.addStretch(1)
+        vbox.addLayout(hbox)
+
+        window.setLayout(vbox)
+
+        ########### Tabs launchers ####################
         # create tab
         self.table_widget = TabsContainer(parent=self)
-        self.setCentralWidget(self.table_widget)
+        vbox.addWidget(self.table_widget)
+        #self.setCentralWidget(self.table_widget)
+
+
 
         self.show()
 
