@@ -8,6 +8,9 @@ small desktop file parser
 import os
 import glob
 import re
+from itertools import product
+
+from config import ICON_PATHS, ICON_THEME, ICON_SIZES, ICON_DEFAULT
 
 
 def get_app_for_folder():
@@ -39,12 +42,27 @@ def txt2fct(command_path):
         os.system(command_path)
     return exec
 
-def icon2path(icon):
-    if re.search('\.', icon):
-        return icon
+def icon2path(icon_name):
+    """
+    return icon path from icon_name :
+        - if icon_name is path to icon, do nothing
+        - if not look for icon in file system
+    """
+    if os.path.isfile(icon_name):
+        icon_path = icon_name
     else:
-        icon = glob.glob(f'/usr/share/icons/hicolor/128x128/*/{icon}.*')[0]
-        return icon
+        t = ICON_THEME
+        icon=path = ICON_DEFAULT
+        for s, p in product(ICON_SIZES, ICON_PATHS):
+            icon_tmp = glob.glob(f'{p}/{t}/{s}x{s}/*/{icon_name}.*')
+            if icon_tmp:
+                icon_path = icon_tmp[0]
+                break
+    return icon_path
+
+            #icon = glob.glob(f'/usr/share/icons/hicolor/128x128/*/{icon}.*')[0]
+
+    return icon
 
 def create_pattern(entry, lang=None):
     if lang != None:
