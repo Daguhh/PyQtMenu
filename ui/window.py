@@ -348,7 +348,7 @@ class Tab(QWidget):
 
     def dropEvent(self, e):
         """ As desktop file is dropped on a tab, create a new launcher """
-        file_path = e.mimeData().text().split('//')[1:][0]
+        file_path = e.mimeData().urls()[0].path() #split('//')[1:][0]
         app = parse_desktop_lang(file_path)
         file_name = file_path.split('/')[-1]
         os.system(f'cp {file_path} Apps/{self.category}/{file_name}')
