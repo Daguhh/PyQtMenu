@@ -281,7 +281,7 @@ class Tab(QWidget):
         self.layout = QGridLayout(self)
         #self.shape = (3,5) # 3x3 squares
         self.width = 3
-        self.max_launcher = 12
+        self.max_launcher = 100 # useless?
         self.gen_position = self.genPos()
 
         self.launcher_size = (100,100)

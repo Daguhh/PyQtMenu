@@ -11,4 +11,5 @@
 * [ ] remove button border
 * [ ] resize text
 * [ ] resize icon with a slider / predifined values
+* [ ] do something about max launchers
 
