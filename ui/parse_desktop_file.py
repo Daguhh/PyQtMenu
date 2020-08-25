@@ -48,11 +48,14 @@ def icon2path(icon_name):
         - if icon_name is path to icon, do nothing
         - if not look for icon in file system
     """
-    if os.path.isfile(icon_name):
+    icon_path = ICON_DEFAULT
+    if not icon_name:
+        print('NoenNoenenennene')
+        pass
+    elif os.path.isfile(icon_name):
         icon_path = icon_name
     else:
         t = ICON_THEME
-        icon_path = ICON_DEFAULT
         for s, p in product(ICON_SIZES, ICON_PATHS):
             icon_tmp = glob.glob(f'{p}/{t}/{s}x{s}/*/{icon_name}.*')
             if icon_tmp:
