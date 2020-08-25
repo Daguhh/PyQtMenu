@@ -50,6 +50,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.title = "PyQtMenu"
         self.setWindowTitle(self.title)
+        self.isSplit = False
         #self.setStyleSheet("""
         #QWidget {
         #
@@ -98,12 +99,14 @@ class MainWindow(QMainWindow):
         reduceBtn.setToolTip("Réduire le menu")
         reduceBtn.setFont(QFont('Times', 80))
         reduceBtn.clicked.connect(MainWindow.reduce_mainwindow)
-        cancelButton = QPushButton("Cancel")
+        splitBtn = QPushButton("Split")
+        splitBtn.setToolTip('place les fenêtres côte à cote à la verticale')
+        splitBtn.clicked.connect(self.toogle_layout)
 
         hbox = QHBoxLayout()
         #hbox.addStretch(1)
         hbox.addWidget(reduceBtn)
-        hbox.addWidget(cancelButton)
+        hbox.addWidget(splitBtn)
 
         vbox = QVBoxLayout()
 #        vbox.addStretch(1)
@@ -117,9 +120,15 @@ class MainWindow(QMainWindow):
         vbox.addWidget(self.table_widget)
         #self.setCentralWidget(self.table_widget)
 
-
-
         self.show()
+
+    def toogle_layout(self):
+        if self.isSplit:
+            os.system("""i3-msg "layout splith" """)
+        else :
+            os.system("""i3-msg "layout tabbed" """)
+        self.isSplit = not self.isSplit
+
 
     def get_size_value(self, *args):
         dialog = AskMultipleValues(*args)
