@@ -124,9 +124,9 @@ class MainWindow(QMainWindow):
 
     def toogle_layout(self):
         if self.isSplit:
-            os.system("""i3-msg "layout splith" """)
-        else :
             os.system("""i3-msg "layout tabbed" """)
+        else :
+            os.system("""i3-msg "layout splith" """)
         self.isSplit = not self.isSplit
 
 
