@@ -50,7 +50,6 @@ def icon2path(icon_name):
     """
     icon_path = ICON_DEFAULT
     if not icon_name:
-        print('NoenNoenenennene')
         pass
     elif os.path.isfile(icon_name):
         icon_path = icon_name

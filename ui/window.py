@@ -10,8 +10,9 @@ Project desciption
 
 import sys
 import os
-from itertools import product
+from itertools import product, count
 import sip
+import subprocess
 
 from PyQt5.QtCore import QSize
 from PyQt5.QtCore import Qt
@@ -35,11 +36,13 @@ from PyQt5.QtWidgets import (
     QDesktopWidget,
     QSizePolicy,
     QGraphicsOpacityEffect,
+    QListWidgetItem,
 )
 from PyQt5.QtGui import QPixmap, QIcon, QStaticText, QColor, QFont
 from PyQt5.QtCore import QThreadPool, QRunnable, pyqtSlot
 
 from .parse_desktop_file import get_app_from_desktop, parse_desktop_lang
+from .layout_manager import Ui_LayoutManagerWidget
 
 
 class MainWindow(QMainWindow):
@@ -244,6 +247,118 @@ class AskMultipleValues(QDialog):
     def cancel(self):
         return 0, 0, False
 
+#class LayoutMgr(QWidget, Ui_LayoutManagerWidget):
+#
+#    def __init__(self):
+#        super(Ui_LayoutManagerWidget, self).__init__()
+#        super(QWidget, self).__init__()
+#
+
+class LayoutMgr(QDialog):
+    """Employee dialog."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        # Create an instance of the GUI
+        self.ui = Ui_LayoutManagerWidget()
+        # Run the .setupUi() method to show the GUI
+        self.ui.setupUi(self)
+
+        self.list_windows()
+
+        self.connect_list()
+
+    def list_windows(self):
+        #cmd = r"wmctrl -lx | sed -r 's/^(\w*).*\.(\w*).*/\1,\2/'"
+        cmd = r"wmctrl -lx | sed -r 's/^(\w*).*?\.(\w*).*/\1,\2/'"
+        out=subprocess.check_output(cmd, shell=True, text=True)
+        self.w_list = [{w_name:X11_id} for X11_id, w_name in [line.split(',') for line in out.split('\n')][:-1]]
+
+        #ipdb.set_trace()
+        for i, w_name, X11_id in [[i, *list(dct.items())[0]] for i, dct in zip(count(0), self.w_list)]:
+            item = QListWidgetItem(w_name)
+            self.w_list[i] = {'name': w_name, 'id':X11_id, 'Qitem':item}
+
+        self.lw_list = self.w_list[:]
+        self.rw_list = []
+
+        #self.ui.rightlistWidget.addItems([list(k.keys())[0] for k in w_list])
+        alph = 'ABCDEFGHIJKLMNOPQRSTU'
+        #for mark, win_name, X11_id in [[l, *list(dc.items())[0]] for l, dc in zip(alph, w_list)]:
+        for mark, w in zip(alph, self.w_list):
+            w['mark'] = mark
+            i3_cmd = f"[id={w['id']}] mark {mark}"
+            cmd = f'i3-msg "{i3_cmd}"'
+            output=subprocess.check_output(cmd, shell=True)
+            print(output)
+
+
+        cmd = '''i3-msg "[con_mark="A"] move right"'''
+        output=subprocess.check_output(cmd, shell=True)
+        output=subprocess.check_output(cmd, shell=True)
+        output=subprocess.check_output(cmd, shell=True)
+        output=subprocess.check_output(cmd, shell=True)
+        output=subprocess.check_output(cmd, shell=True)
+        output=subprocess.check_output(cmd, shell=True)
+        print(output)
+
+        for i, w in enumerate(self.lw_list):
+            if w['mark'] == 'A':
+                self.rw_list.append(self.lw_list.pop(i))
+
+        self.ui.leftlistWidget.addItems([w['name'] for w in self.lw_list])
+        self.ui.rightlistWidget.addItems([w['name'] for w in self.rw_list])
+
+        os.system("""i3-msg "[con_mark="A"] split horizontal" """)
+        os.system("""i3-msg "[con_mark="A"] focus, layout tabbed" """)
+
+    def connect_list(self):
+
+        self.ui.moveleftBtn.clicked.connect(self.moveleft)
+        self.ui.moverightBtn.clicked.connect(self.moveright)
+
+    def moveright(self):
+
+        #import ipdb
+        selected = self.ui.leftlistWidget.currentRow()
+        print('selectd : ', selected)
+        w_selected = self.lw_list[selected]
+        self.rw_list.append(self.lw_list.pop(selected))
+        item = self.ui.leftlistWidget.takeItem(selected)
+        #item = self.ui.leftlistWidget.takeItem(item.
+        #print(type(item))
+        #ipdb.set_trace()
+        self.ui.rightlistWidget.addItem(item)
+
+        print(w_selected['name'], w_selected['id'])
+        #cmd = f'''i3-msg "[id={w_selected['id']}] move right"'''
+        list_head_l_mark = self.rw_list[0]['mark']
+        print(list_head_l_mark)
+        cmd = f'''i3-msg "[id={w_selected['id']}] move to mark "{list_head_l_mark}""'''
+        print(cmd)
+        #cmd = f'''i3-msg "[con_id={w_selected['id']}] move right"'''
+        output=subprocess.check_output(cmd, shell=True)
+        print(output)
+
+    def moveleft(self):
+
+        selected = self.ui.rightlistWidget.currentRow()
+        print('selectd : ', selected)
+        w_selected = self.rw_list[selected]
+        self.lw_list.append(self.rw_list.pop(selected))
+        item = self.ui.rightlistWidget.takeItem(selected)
+        self.ui.leftlistWidget.addItem(item)
+
+
+        list_head_w_mark = self.lw_list[0]['mark']
+
+        print(w_selected['name'], w_selected['id'])
+        cmd = f'''i3-msg "[id={w_selected['id']}] move to mark "{list_head_w_mark}""'''
+        output=subprocess.check_output(cmd, shell=True)
+        print(output)
+
+
+
+
 
 class TabsContainer(QWidget):
     """
@@ -269,6 +384,10 @@ class TabsContainer(QWidget):
             tab = ScrollTab(category)
             name = category
             self.tabs.addTab(tab, name)
+
+        layout_mgr = LayoutMgr()
+        name = 'layout'
+        self.tabs.addTab(layout_mgr, name)
 
         # Fill tabs with apps with launchers
         for app in app_list:
