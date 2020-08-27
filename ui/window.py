@@ -105,11 +105,14 @@ class MainWindow(QMainWindow):
         splitBtn = QPushButton("Split")
         splitBtn.setToolTip("place les fenêtres côte à cote à la verticale")
         splitBtn.clicked.connect(self.toogle_layout)
+        twopanelBtn = QPushButton('2 panel')
+        twopanelBtn.setToolTip("dispose les fenêtes sous forme de deux panneaux")
 
         hbox = QHBoxLayout()
         # hbox.addStretch(1)
         hbox.addWidget(reduceBtn)
         hbox.addWidget(splitBtn)
+        hbox.addWidget(twopanelBtn)
 
         vbox = QVBoxLayout()
         #        vbox.addStretch(1)
@@ -120,6 +123,7 @@ class MainWindow(QMainWindow):
         ########### Tabs launchers ####################
         # create tab
         self.table_widget = TabsContainer(parent=self)
+        twopanelBtn.clicked.connect(self.table_widget.layout_mgr.refresh)
         vbox.addWidget(self.table_widget)
         # self.setCentralWidget(self.table_widget)
 
@@ -143,7 +147,6 @@ class MainWindow(QMainWindow):
 
     #    @classmethod
     #    def toggle_bigpicture(cls):
-    #        print('enable bigpiture')
     #        cls.bigpicture = not cls.bigpicture
 
     @classmethod
@@ -263,53 +266,56 @@ class LayoutMgr(QDialog):
         # Run the .setupUi() method to show the GUI
         self.ui.setupUi(self)
 
-        self.list_windows()
+        # list list
+        self.l_Qlist = self.ui.leftlistWidget
+        self.r_Qlist = self.ui.rightlistWidget
+        self.l_list=[]
+        self.r_list=[]
 
         self.connect_list()
 
+    def refresh(self):
+
+        self.l_Qlist.clear()
+        self.r_Qlist.clear()
+        self.l_list=[]
+        self.r_list=[]
+
+        self.list_windows()
+
     def list_windows(self):
-        #cmd = r"wmctrl -lx | sed -r 's/^(\w*).*\.(\w*).*/\1,\2/'"
+
+        # get window list and their id
         cmd = r"wmctrl -lx | sed -r 's/^(\w*).*?\.(\w*).*/\1,\2/'"
-        out=subprocess.check_output(cmd, shell=True, text=True)
-        self.w_list = [{w_name:X11_id} for X11_id, w_name in [line.split(',') for line in out.split('\n')][:-1]]
+        out = subprocess.check_output(cmd, shell=True, text=True)
+        self.w_list = [{'name':w_name,'id':X11_id} for X11_id, w_name in [line.split(',') for line in out.split('\n')][:-1]]
 
-        #ipdb.set_trace()
-        for i, w_name, X11_id in [[i, *list(dct.items())[0]] for i, dct in zip(count(0), self.w_list)]:
-            item = QListWidgetItem(w_name)
-            self.w_list[i] = {'name': w_name, 'id':X11_id, 'Qitem':item}
-
-        self.lw_list = self.w_list[:]
-        self.rw_list = []
-
-        #self.ui.rightlistWidget.addItems([list(k.keys())[0] for k in w_list])
+        # Mark all windows (see i3wm doc for mark)
         alph = 'ABCDEFGHIJKLMNOPQRSTU'
-        #for mark, win_name, X11_id in [[l, *list(dc.items())[0]] for l, dc in zip(alph, w_list)]:
         for mark, w in zip(alph, self.w_list):
             w['mark'] = mark
             i3_cmd = f"[id={w['id']}] mark {mark}"
             cmd = f'i3-msg "{i3_cmd}"'
-            output=subprocess.check_output(cmd, shell=True)
-            print(output)
+            subprocess.check_output(cmd, shell=True)
 
+        # create list of window for right and left container
+        self.l_list = self.w_list[:] # put all window on the left
+        self.r_list = []
+        for i, w in enumerate(self.l_list):
+            if w['mark'] == 'A': # put window with mark A in right list
+                self.r_list.append(self.l_list.pop(i))
 
+        # move first window to the right and make a tabbed container
         cmd = '''i3-msg "[con_mark="A"] move right"'''
-        output=subprocess.check_output(cmd, shell=True)
-        output=subprocess.check_output(cmd, shell=True)
-        output=subprocess.check_output(cmd, shell=True)
-        output=subprocess.check_output(cmd, shell=True)
-        output=subprocess.check_output(cmd, shell=True)
-        output=subprocess.check_output(cmd, shell=True)
-        print(output)
-
-        for i, w in enumerate(self.lw_list):
-            if w['mark'] == 'A':
-                self.rw_list.append(self.lw_list.pop(i))
-
-        self.ui.leftlistWidget.addItems([w['name'] for w in self.lw_list])
-        self.ui.rightlistWidget.addItems([w['name'] for w in self.rw_list])
-
+        for i in range(7):
+            output=subprocess.check_output(cmd, shell=True)
         os.system("""i3-msg "[con_mark="A"] split horizontal" """)
         os.system("""i3-msg "[con_mark="A"] focus, layout tabbed" """)
+
+        # show list item in QtListWidget
+        self.l_Qlist.addItems([w['name'] for w in self.l_list])
+        self.r_Qlist.addItems([w['name'] for w in self.r_list])
+
 
     def connect_list(self):
 
@@ -318,46 +324,39 @@ class LayoutMgr(QDialog):
 
     def moveright(self):
 
-        #import ipdb
-        selected = self.ui.leftlistWidget.currentRow()
-        print('selectd : ', selected)
-        w_selected = self.lw_list[selected]
-        self.rw_list.append(self.lw_list.pop(selected))
-        item = self.ui.leftlistWidget.takeItem(selected)
-        #item = self.ui.leftlistWidget.takeItem(item.
-        #print(type(item))
-        #ipdb.set_trace()
-        self.ui.rightlistWidget.addItem(item)
+        # get selected window
+        i = self.l_Qlist.currentRow()
+        w = self.l_list[i]
 
-        print(w_selected['name'], w_selected['id'])
-        #cmd = f'''i3-msg "[id={w_selected['id']}] move right"'''
-        list_head_l_mark = self.rw_list[0]['mark']
-        print(list_head_l_mark)
-        cmd = f'''i3-msg "[id={w_selected['id']}] move to mark "{list_head_l_mark}""'''
-        print(cmd)
-        #cmd = f'''i3-msg "[con_id={w_selected['id']}] move right"'''
-        output=subprocess.check_output(cmd, shell=True)
-        print(output)
+        # update list
+        self.r_list.append(self.l_list.pop(i))
+
+        # update Qt list
+        item = self.l_Qlist.takeItem(i)
+        self.r_Qlist.addItem(item)
+
+        # move next to top list window (i3wm mark)
+        list_head_l_mark = self.r_list[0]['mark']
+        cmd = f'''i3-msg "[id={w['id']}] move to mark "{list_head_l_mark}""'''
+        subprocess.check_output(cmd, shell=True)
 
     def moveleft(self):
 
-        selected = self.ui.rightlistWidget.currentRow()
-        print('selectd : ', selected)
-        w_selected = self.rw_list[selected]
-        self.lw_list.append(self.rw_list.pop(selected))
-        item = self.ui.rightlistWidget.takeItem(selected)
-        self.ui.leftlistWidget.addItem(item)
+        # get selected window
+        i = self.r_Qlist.currentRow()
+        w = self.r_list[i]
 
+        # update list
+        self.l_list.append(self.r_list.pop(i))
 
-        list_head_w_mark = self.lw_list[0]['mark']
+        # update Qt list
+        item = self.r_Qlist.takeItem(i)
+        self.l_Qlist.addItem(item)
 
-        print(w_selected['name'], w_selected['id'])
-        cmd = f'''i3-msg "[id={w_selected['id']}] move to mark "{list_head_w_mark}""'''
-        output=subprocess.check_output(cmd, shell=True)
-        print(output)
-
-
-
+        # move next to top list window (i3wm mark)
+        list_head_r_mark = self.l_list[0]['mark']
+        cmd = f'''i3-msg "[id={w['id']}] move to mark "{list_head_r_mark}""'''
+        subprocess.check_output(cmd, shell=True)
 
 
 class TabsContainer(QWidget):
@@ -385,9 +384,10 @@ class TabsContainer(QWidget):
             name = category
             self.tabs.addTab(tab, name)
 
-        layout_mgr = LayoutMgr()
+        # add a tab for layout management
+        self.layout_mgr = LayoutMgr()
         name = 'layout'
-        self.tabs.addTab(layout_mgr, name)
+        self.tabs.addTab(self.layout_mgr, name)
 
         # Fill tabs with apps with launchers
         for app in app_list:
@@ -586,9 +586,7 @@ class AppRunner(QRunnable):
         """
         Your code goes in this function
         """
-        print("Thread start")
         self.command()
-        print("Thread complete")
 
 
 if __name__ == "__main__":
