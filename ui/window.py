@@ -58,7 +58,7 @@ class MainWindow(QMainWindow):
         self.isSplit = False
 #        self.setStyleSheet("""
 #""")
-        self.setMouseTracking(True)
+        #self.setMouseTracking(True)
         MainWindow.instance = self
 
         self.initUI()
@@ -92,25 +92,24 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(window)
 
         reduceBtn = QPushButton("M")
-        # reduceBtn.setGeometry(0, 0, 200, 200)
         reduceBtn.setFixedSize(100, 100)
         reduceBtn.setToolTip("Réduire le menu")
         reduceBtn.setFont(QFont("Times", 80))
         reduceBtn.clicked.connect(MainWindow.reduce_mainwindow)
+
         splitBtn = QPushButton("Split")
         splitBtn.setToolTip("place les fenêtres côte à cote à la verticale")
         splitBtn.clicked.connect(self.toogle_layout)
+
         twopanelBtn = QPushButton("2 panel")
         twopanelBtn.setToolTip("dispose les fenêtes sous forme de deux panneaux")
 
         hbox = QHBoxLayout()
-        # hbox.addStretch(1)
         hbox.addWidget(reduceBtn)
         hbox.addWidget(splitBtn)
         hbox.addWidget(twopanelBtn)
 
         vbox = QVBoxLayout()
-        #        vbox.addStretch(1)
         vbox.addLayout(hbox)
 
         window.setLayout(vbox)
@@ -120,7 +119,6 @@ class MainWindow(QMainWindow):
         self.table_widget = TabsContainer(parent=self)
         twopanelBtn.clicked.connect(self.table_widget.layout_mgr.refresh)
         vbox.addWidget(self.table_widget)
-        # self.setCentralWidget(self.table_widget)
 
         self.show()
 
@@ -133,16 +131,11 @@ class MainWindow(QMainWindow):
 
     def get_size_value(self, *args):
         dialog = AskMultipleValues(*args)
-        # dialog.exec_()
         if dialog.exec_():
             vals = dialog.get_values()
         else:
             vals = dialog.cancel()
         return vals
-
-    #    @classmethod
-    #    def toggle_bigpicture(cls):
-    #        cls.bigpicture = not cls.bigpicture
 
     @classmethod
     def reduce_mainwindow(cls):
@@ -150,12 +143,11 @@ class MainWindow(QMainWindow):
             return
         dialog = ReduceModButton()
         MainWindow.instance.hide()
-        # self.hide()
         if dialog.exec_():
             vals = dialog.accept()
             cls.instance.show()
         else:
-            vals = dialog.cancel()
+            QApplication.quit()
         return
 
     def resize_icons(self):
@@ -173,29 +165,28 @@ class ReduceModButton(QDialog):
     """ button that reopen main window """
 
     def __init__(self):
+
         super(QDialog, self).__init__()
         self.layout = QGridLayout(self)  # QVBoxLayout(self)
+
         reopen_button = QPushButton("M")
         reopen_button.setGeometry(0, 0, 100, 100)
         reopen_button.setStatusTip("Afficher le menu en plein écran")
         reopen_button.clicked.connect(self.accept)
+
         self.setGeometry(0, 0, 150, 150)
-        # bottomright_pos = QApplication.desktop().availableGeometry().bottomRight()
+
         dialog_size = self.geometry().getRect()
         desktop_size = QApplication.desktop().screenGeometry().getRect()
+
         *_, x, y = map(lambda x, y: y - x - 30, dialog_size, desktop_size)
         self.move(x, y)
-        reopen_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        reopen_button.setStyleSheet(
-            "background-color:rgba(55,55,55,15);"
-        )  # setPalette().setColo(QColor(0,0,0,20))
-        reopen_button.setFont(QFont("Times", 48))
-        # reopen_button.setPalette(
 
-        # rightpoint = QDesktopWidget().availableGeometry().bottomRight()
+        reopen_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        reopen_button.setStyleSheet("background-color:rgba(55,55,55,15);")
+        reopen_button.setFont(QFont("Times", 48))
 
         self.layout.addWidget(reopen_button)
-        #        self.setWindowOpacity(10)
         op = QGraphicsOpacityEffect(self)
         op.setOpacity(0.5)  # 0 to 1 will cause the fade effect to kick in
         self.setGraphicsEffect(op)
@@ -203,16 +194,17 @@ class ReduceModButton(QDialog):
 
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setWindowFlags(Qt.FramelessWindowHint)
-        # self.move(rightpoint)
 
 
 class AskMultipleValues(QDialog):
     """ Dialog to resize icon """
 
     def __init__(self, *args, **kwargs):
+
         super(QDialog, self).__init__()
         self.layout = QGridLayout(self)  # QVBoxLayout(self)
         self.textEdits = []
+
         for i, item in enumerate(args):
             text = QLabel(item)
             textEdit = QLineEdit()
@@ -239,23 +231,20 @@ class AskMultipleValues(QDialog):
         vals = []
         for textEdit in self.textEdits:
             vals.append(textEdit.text())
-
-        return (*vals, True)
+        try :
+            if any([int(val) >= 1 for val in vals]):
+                return (*vals, True)
+            else :
+                raise ValueError("Size must be >= 1")
+        except ValueError as e:
+            print(f"{e}\nwrong value for icon size")
+            return 0, 0, False
 
     def cancel(self):
         return 0, 0, False
 
 
-# class LayoutMgr(QWidget, Ui_LayoutManagerWidget):
-#
-#    def __init__(self):
-#        super(Ui_LayoutManagerWidget, self).__init__()
-#        super(QWidget, self).__init__()
-#
-
-
 class LayoutMgr(QDialog):
-    """Employee dialog."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -309,10 +298,9 @@ class LayoutMgr(QDialog):
 
         # move first window to the right and make a tabbed container
         cmd = '''i3-msg "[con_mark="A"] move right"'''
-        for i in range(7):
+        for i in range(len(self.l_list)+1):
             output = subprocess.check_output(cmd, shell=True)
-        os.system("""i3-msg "[con_mark="A"] split horizontal" """)
-        os.system("""i3-msg "[con_mark="A"] focus, layout tabbed" """)
+        self.maketabbedcontainer(mark='A')
 
         # show list item in QtListWidget
         self.l_Qlist.addItems([w["name"] for w in self.l_list])
@@ -323,41 +311,88 @@ class LayoutMgr(QDialog):
         self.ui.moveleftBtn.clicked.connect(self.moveleft)
         self.ui.moverightBtn.clicked.connect(self.moveright)
 
+    def maketabbedcontainer(self, mark):
+
+        os.system(f"""i3-msg "[con_mark="{mark}"] split horizontal" """)
+        os.system(f"""i3-msg "[con_mark="{mark}"] focus, layout tabbed" """)
+
+    def swap_list(self, sQl, eQl, sl, el):
+
+        # sawp Qlist
+        l_item = sQl.takeItem(0)
+        while True:
+            r_item = eQl.takeItem(0)
+            if r_item == None :
+                break
+            sQl.addItem(r_item)
+        eQl.addItem(l_item)
+
+        #swap list
+        self.l_list, self.r_list = self.r_list[:], self.l_list[:]
+
+
     def moveright(self):
 
-        # get selected window
-        i = self.l_Qlist.currentRow()
-        w = self.l_list[i]
-
-        # update list
-        self.r_list.append(self.l_list.pop(i))
-
-        # update Qt list
-        item = self.l_Qlist.takeItem(i)
-        self.r_Qlist.addItem(item)
-
-        # move next to top list window (i3wm mark)
-        list_head_l_mark = self.r_list[0]["mark"]
-        cmd = f'''i3-msg "[id={w['id']}] move to mark "{list_head_l_mark}""'''
-        subprocess.check_output(cmd, shell=True)
+        self.move(sQl=self.l_Qlist,
+                  eQl=self.r_Qlist,
+                  sl=self.l_list,
+                  el=self.r_list,
+                  direction='right')
 
     def moveleft(self):
 
+        self.move(sQl=self.r_Qlist,
+                  eQl=self.l_Qlist,
+                  sl=self.r_list,
+                  el=self.l_list,
+                  direction='left')
+
+    def move(self, sQl, eQl, sl, el, direction):
+
         # get selected window
-        i = self.r_Qlist.currentRow()
-        w = self.r_list[i]
+        i = sQl.currentRow()
 
-        # update list
-        self.l_list.append(self.r_list.pop(i))
+        # if only one window left : swap containers
+        if len(sl) == 1:
+            mark = sl[0]['mark']
+            cmd = f'''i3-msg "[con_mark="{mark}"] move {direction}"'''
+            for i in range(len(el)+1):
+                subprocess.check_output(cmd, shell=True)
 
-        # update Qt list
-        item = self.r_Qlist.takeItem(i)
-        self.l_Qlist.addItem(item)
+            self.swap_list(sQl, eQl, sl, el)
+            self.maketabbedcontainer(mark)
 
-        # move next to top list window (i3wm mark)
-        list_head_r_mark = self.l_list[0]["mark"]
-        cmd = f'''i3-msg "[id={w['id']}] move to mark "{list_head_r_mark}""'''
-        subprocess.check_output(cmd, shell=True)
+        else:
+            w = sl[i]
+            # update list
+            el.append(sl.pop(i))
+
+            # update Qt list
+            item = self.l_Qlist.takeItem(i)
+            eQl.addItem(item)
+
+            # move next to top list window (i3wm mark)
+            list_head_l_mark = el[0]["mark"]
+            cmd = f'''i3-msg "[id={w['id']}] move to mark "{list_head_l_mark}""'''
+            subprocess.check_output(cmd, shell=True)
+
+#    def moveleft(self):
+#
+#        # get selected window
+#        i = self.r_Qlist.currentRow()
+#        w = self.r_list[i]
+#
+#        # update list
+#        self.l_list.append(self.r_list.pop(i))
+#
+#        # update Qt list
+#        item = self.r_Qlist.takeItem(i)
+#        self.l_Qlist.addItem(item)
+#
+#        # move next to top list window (i3wm mark)
+#        list_head_r_mark = self.l_list[0]["mark"]
+#        cmd = f'''i3-msg "[id={w['id']}] move to mark "{list_head_r_mark}""'''
+#        subprocess.check_output(cmd, shell=True)
 
 
 class TabsContainer(QWidget):
@@ -385,10 +420,8 @@ class TabsContainer(QWidget):
             name = category
             self.tabs.addTab(tab, name)
 
-        # add a tab for layout management
-        self.layout_mgr = LayoutMgr()
-        name = "layout"
-        self.tabs.addTab(self.layout_mgr, name)
+        # add module tab
+        self.addtabmodule()
 
         # Fill tabs with apps with launchers
         for app in app_list:
@@ -398,6 +431,13 @@ class TabsContainer(QWidget):
         # Add tabs to widget
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
+
+    def addtabmodule(self):
+
+        # add a tab for layout management (i3module)
+        self.layout_mgr = LayoutMgr()
+        name = "layout"
+        self.tabs.addTab(self.layout_mgr, name)
 
 
 class ScrollTab(QScrollArea):
@@ -538,7 +578,9 @@ class AppLauncherBtn(QFrame):
                 padding: 2px;
             }
             QFrame:pressed {
-                border: 10px solid green;
+                border: 50px solid green;
+                border-radius: 44px;
+                padding: 2px;
             }
         """)
 
@@ -552,6 +594,11 @@ class AppLauncherBtn(QFrame):
         self.btn.setStyleSheet("""
             QPushButton {
                 border: None;
+            }
+            QPushButton:pressed {
+                border: 50px solid white;
+                border-radius: 60px;
+                padding: 4px;
             }
         """)
         #25px solid #6593cf;
