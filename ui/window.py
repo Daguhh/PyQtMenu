@@ -284,7 +284,8 @@ class LayoutMgr(QDialog):
     def list_windows(self):
 
         # get window list and their id
-        cmd = r"wmctrl -lx | sed -r 's/^(\w*).*?\.(\w*).*/\1,\2/'"
+        #cmd = r"wmctrl -lx | sed -r 's/^(\w*).*?\.(\w*).*/\1,\2/'"
+        cmd = r"wmctrl -lx | sed -r 's/^(\w*)[^.]*\.(\w*).*/\1,\2/'"
         out = subprocess.check_output(cmd, shell=True, text=True)
         self.w_list = [
             {"name": w_name, "id": X11_id}
