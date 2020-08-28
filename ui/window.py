@@ -44,6 +44,7 @@ from PyQt5.QtCore import QThreadPool, QRunnable, pyqtSlot
 
 from .parse_desktop_file import get_app_from_desktop, parse_desktop_lang
 from .layout_manager import Ui_LayoutManagerWidget
+from .qss import APP_BUTTON_QSS, APP_LABEL_QSS, APP_LAUNCHER_QSS
 
 
 class MainWindow(QMainWindow):
@@ -319,17 +320,16 @@ class LayoutMgr(QDialog):
     def swap_list(self, sQl, eQl, sl, el):
 
         # sawp Qlist
-        l_item = sQl.takeItem(0)
+        s_item = sQl.takeItem(0)
         while True:
-            r_item = eQl.takeItem(0)
-            if r_item == None :
+            e_item = eQl.takeItem(0)
+            if e_item == None :
                 break
-            sQl.addItem(r_item)
-        eQl.addItem(l_item)
+            sQl.addItem(e_item)
+        eQl.addItem(s_item)
 
         #swap list
         self.l_list, self.r_list = self.r_list[:], self.l_list[:]
-
 
     def moveright(self):
 
@@ -368,7 +368,7 @@ class LayoutMgr(QDialog):
             el.append(sl.pop(i))
 
             # update Qt list
-            item = self.l_Qlist.takeItem(i)
+            item = sQl.takeItem(i)
             eQl.addItem(item)
 
             # move next to top list window (i3wm mark)
@@ -571,18 +571,7 @@ class AppLauncherBtn(QFrame):
         self.icon_size = (int(size[0]), int(size[1]))
         self.setFixedSize(size[0] + 20, size[1] + 35)
 
-        self.setStyleSheet("""
-            QFrame:hover {
-                border: 2px solid green;
-                border-radius: 4px;
-                padding: 2px;
-            }
-            QFrame:pressed {
-                border: 50px solid green;
-                border-radius: 44px;
-                padding: 2px;
-            }
-        """)
+        self.setStyleSheet(APP_LAUNCHER_QSS)
 
         name = app["Name"]  # 'qrcopy'
         icon = app["Icon"]  # 'qrcode.png'
@@ -591,28 +580,8 @@ class AppLauncherBtn(QFrame):
         self.btn = QPushButton("")
         self.btn.setIcon(QIcon(QPixmap(icon)))
         self.btn.setIconSize(QSize(*self.icon_size))
-        self.btn.setStyleSheet("""
-            QPushButton {
-                border: None;
-            }
-            QPushButton:pressed {
-                border: 50px solid white;
-                border-radius: 60px;
-                padding: 4px;
-            }
-        """)
-        #25px solid #6593cf;
-        #        border-radius: 2px;
-        #        //margin: 20px;
-        #        padding: 20px
-        #"    }
-        #""")
-#        QWidget {
-#            border: 20px solid black;
-#            border-radius: 10px;
-#            background-color: rgb(255, 255, 255);
-#            }
-#        """)
+        self.btn.setStyleSheet(APP_BUTTON_QSS)
+
         self.layout.addWidget(self.btn)
         self.btn.setToolTip(tooltip)
 
@@ -623,11 +592,8 @@ class AppLauncherBtn(QFrame):
 
         txt = QLabel(name)
         txt.setAlignment(Qt.AlignHCenter)
-        txt.setStyleSheet("""
-            QLabel {
-                border : None;
-                }
-        """)
+        txt.setStyleSheet(APP_LABEL_QSS)
+
         self.layout.addWidget(txt)
 
         self.setLayout(self.layout)
