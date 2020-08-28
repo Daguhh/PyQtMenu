@@ -37,6 +37,7 @@ from PyQt5.QtWidgets import (
     QSizePolicy,
     QGraphicsOpacityEffect,
     QListWidgetItem,
+    QFrame,
 )
 from PyQt5.QtGui import QPixmap, QIcon, QStaticText, QColor, QFont
 from PyQt5.QtCore import QThreadPool, QRunnable, pyqtSlot
@@ -55,15 +56,9 @@ class MainWindow(QMainWindow):
         self.title = "PyQtMenu"
         self.setWindowTitle(self.title)
         self.isSplit = False
-        # self.setStyleSheet("""
-        # QWidget {
-        #
-        #    border: 20px solid black;
-        #    border-radius: 10px;
-        #    background-color: rgb(255, 255, 255);
-        #    }
-        # """)
-
+#        self.setStyleSheet("""
+#""")
+        self.setMouseTracking(True)
         MainWindow.instance = self
 
         self.initUI()
@@ -522,18 +517,29 @@ class Tab(QWidget):
         self.addLauncher(app)
 
 
-class AppLauncherBtn(QWidget):
+class AppLauncherBtn(QFrame):
     instances = {}
 
     def __init__(self, parent_tab, app, pos, size):
 
-        super(QWidget, self).__init__()
+        super(QFrame, self).__init__()
 
         self.layout = QVBoxLayout(self)
         self.size = size
         # layout.SetFixedSize = 120, 100
         self.icon_size = (int(size[0]), int(size[1]))
         self.setFixedSize(size[0] + 20, size[1] + 35)
+
+        self.setStyleSheet("""
+            QFrame:hover {
+                border: 2px solid green;
+                border-radius: 4px;
+                padding: 2px;
+            }
+            QFrame:pressed {
+                border: 10px solid green;
+            }
+        """)
 
         name = app["Name"]  # 'qrcopy'
         icon = app["Icon"]  # 'qrcode.png'
@@ -542,6 +548,23 @@ class AppLauncherBtn(QWidget):
         self.btn = QPushButton("")
         self.btn.setIcon(QIcon(QPixmap(icon)))
         self.btn.setIconSize(QSize(*self.icon_size))
+        self.btn.setStyleSheet("""
+            QPushButton {
+                border: None;
+            }
+        """)
+        #25px solid #6593cf;
+        #        border-radius: 2px;
+        #        //margin: 20px;
+        #        padding: 20px
+        #"    }
+        #""")
+#        QWidget {
+#            border: 20px solid black;
+#            border-radius: 10px;
+#            background-color: rgb(255, 255, 255);
+#            }
+#        """)
         self.layout.addWidget(self.btn)
         self.btn.setToolTip(tooltip)
 
@@ -552,6 +575,11 @@ class AppLauncherBtn(QWidget):
 
         txt = QLabel(name)
         txt.setAlignment(Qt.AlignHCenter)
+        txt.setStyleSheet("""
+            QLabel {
+                border : None;
+                }
+        """)
         self.layout.addWidget(txt)
 
         self.setLayout(self.layout)
