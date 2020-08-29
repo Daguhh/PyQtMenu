@@ -10,7 +10,7 @@ import glob
 import re
 from itertools import product
 
-from config import ICON_PATHS, ICON_THEME, ICON_SIZES, ICON_DEFAULT
+from .config import ICON_PATHS, ICON_THEME, ICON_SIZES, ICON_DEFAULT
 
 
 def get_app_for_folder():
