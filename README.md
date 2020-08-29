@@ -1,14 +1,14 @@
 # PyQtMenu
 A PyQt5 menu to display my apps or any .desktop file
 
-<img src="https://raw.githubusercontent.com/Daguhh/PyQtMenu/reduce_mod/Screenshots/screens.gif" width="350">
-
 * Display desktop files into multiple tab, 
 * Drag'n'Drop desktop file to add it in menu
 
 new :
 * Reduce mode : reduce launcher to a small floating button at application lauch
 * Dual panel view (with i3) : control windows positions from tab "layout"
+
+<img src="https://raw.githubusercontent.com/Daguhh/PyQtMenu/reduce_mod/Screenshots/screens.gif" width="350">
 
 ### Add a launcher
 You should have a .desktop file with the following entries:
