@@ -281,7 +281,7 @@ class ScrollTab(QScrollArea):
     def __init__(self, category):
 
         super(QScrollArea, self).__init__()
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setWidgetResizable(True)
 

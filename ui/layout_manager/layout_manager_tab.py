@@ -15,6 +15,7 @@ from PyQt5.QtWidgets import (
     QListWidgetItem,
     QFrame,
 )
+from PyQt5.QtCore import Qt
 
 from .layout_manager import Ui_LayoutManagerWidget
 
@@ -25,6 +26,7 @@ class LayoutMgr(QWidget):
         self.ui = Ui_LayoutManagerWidget()
         # Run the .setupUi() method to show the GUI
         self.ui.setupUi(self)
+        #self.ui.hbox.setWidgetResizable(True)
 
         self.tabbed = True
 
