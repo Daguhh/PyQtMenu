@@ -100,9 +100,9 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(window)
 
         reduceBtn = QPushButton("M")
-        reduceBtn.setFixedSize(100, 100)
+        reduceBtn.setFixedSize(50, 50)
         reduceBtn.setToolTip("Réduire le menu")
-        reduceBtn.setFont(QFont("Times", 80))
+        reduceBtn.setFont(QFont("Times", 32))
         reduceBtn.clicked.connect(MainWindow.reduce_mainwindow)
 
 #        splitBtn = QPushButton("Split")
@@ -112,14 +112,16 @@ class MainWindow(QMainWindow):
 #        twopanelBtn = QPushButton("2 panel")
 #        twopanelBtn.setToolTip("dispose les fenêtes sous forme de deux panneaux")
 
-        self.twopanelCb = QCheckBox("Vue à deux panneaux")
+        self.twopanelCb = QCheckBox()#"Vue à deux panneaux")
         self.twopanelCb.setToolTip(
             "Disposer les fenêtres en deux panneaux séparées verticalement"
         )
+        self.twopanelCb.setIcon(QIcon('ui/icons/dual_panel.png'))
         self.twopanelCb.setChecked(False)
         self.twopanelCb.stateChanged.connect(self.toogle_layout)
 
-        self.reduceCb = QCheckBox("Réduire le menu")
+        self.reduceCb = QCheckBox()#"Réduire le menu")
+        self.reduceCb.setIcon(QIcon('ui/icons/reduce.png'))
         self.reduceCb.setToolTip(
             "Réduire le menu au lancement d'une application"
         )
@@ -128,8 +130,13 @@ class MainWindow(QMainWindow):
 
         hbox = QHBoxLayout()
         hbox.addWidget(reduceBtn)
-        hbox.addWidget(self.twopanelCb)
-        hbox.addWidget(self.reduceCb)
+        vbox2 = QVBoxLayout()
+
+        vbox2.addWidget(self.twopanelCb)
+        vbox2.addWidget(self.reduceCb)
+
+        hbox.addStretch(1)
+        hbox.addLayout(vbox2)
 
         vbox = QVBoxLayout()
         vbox.addLayout(hbox)
@@ -313,7 +320,7 @@ class Tab(QWidget):
         self.max_launcher = 100  # useless?
         self.gen_position = self.genPos()
 
-        self.launcher_size = (100, 100)
+        self.launcher_size = (100, 50)
 
         self.setMinimumWidth((self.launcher_size[0] * 1.3))
 
