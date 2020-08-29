@@ -2,6 +2,8 @@
 
 import subprocess
 import os
+import time
+from itertools import product, chain
 
 from PyQt5.QtWidgets import (
     QDialog,
@@ -16,13 +18,15 @@ from PyQt5.QtWidgets import (
 
 from .layout_manager import Ui_LayoutManagerWidget
 
-class LayoutMgr(QDialog):
+class LayoutMgr(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         # Create an instance of the GUI
         self.ui = Ui_LayoutManagerWidget()
         # Run the .setupUi() method to show the GUI
         self.ui.setupUi(self)
+
+        self.tabbed = True
 
         # list list
         self.l_Qlist = self.ui.leftlistWidget
@@ -32,10 +36,42 @@ class LayoutMgr(QDialog):
 
         self.connect_list()
 
+    def enterEvent(self, e):
+
+        if self.tabbed:
+            return
+        old_list = self.l_list +  self.r_list
+        new_list = self.list_windows()
+        for new_w in new_list:
+            known = False
+            for old_w in old_list:
+                if new_w['id'] == old_w['id']:
+                    known = True
+                    break
+            if not known:
+                self.mark_window(new_w)
+
+
+                id_from = new_w['id']
+                mark_to = self.l_list[0]['mark']
+
+                cmd = f'''i3-msg "[id={id_from}] move to mark "{mark_to}""'''
+                subprocess.check_output(cmd, shell=True)
+
+
+
+                #os.system(f"""i3-msg "[con_mark="{self.l_list[0]['mark']}"] focus" """)
+                #os.system(f""" i3-msg "[con_mark="{new_w['mark']}" move to mark "{self.l_list[0]['mark']}" " """)
+                #cmd = f'''i3-msg "[id={w['id']}] move to mark "{list_head_l_mark}""'''
+                self.l_list.append(new_w)
+                self.l_Qlist.addItem(new_w['name'])
+
+
     def refresh(self):
 
         if self.sender().isChecked():
 
+            self.tabbed = False
             self.l_Qlist.clear()
             self.r_Qlist.clear()
             self.l_list = []
@@ -43,49 +79,69 @@ class LayoutMgr(QDialog):
 
             #self.list_windows()
             self.make_panels()
+            print("====== activated =========")
 
         else:
-
+            self.tabbed = True
             for i in range(len(self.l_list)):
+                #time.sleep(3)
                 self.l_Qlist.setCurrentRow(0)
                 self.moveright()
+            print('======== deactivate============')
 
 
-    def list_windows(self):
+    @staticmethod
+    def list_windows():
 
         # get window list and their id
         # cmd = r"wmctrl -lx | sed -r 's/^(\w*).*?\.(\w*).*/\1,\2/'"
         cmd = r"wmctrl -lx | sed -r 's/^(\w*)[^.]*\.(\w*).*/\1,\2/'"
         out = subprocess.check_output(cmd, shell=True, text=True)
-        self.l_list = [
+        win_list = [
             {"name": w_name, "id": X11_id}
-            for X11_id, w_name in [line.split(",") for line in out.split("\n")][:-1]
+            for X11_id, w_name in [line.split(",") for line in out.split("\n")][:-1] if w_name != "pyqtmenu"
         ]
-        self.r_list = []
 
-        self.mark_windows(self.l_list)
+        return win_list
 
     def make_panels(self):
 
-        self.list_windows()
+        self.l_list = self.list_windows()
+        self.r_list = []
+        for win in self.l_list:
+            self.mark_window(win)
+        #self.mark_windows(self.l_list)
 
-        for i, w in enumerate(self.l_list):
-            if w["mark"] == "A":  # put window with mark A in right list
-                self.r_list.append(self.l_list.pop(i))
+        #for i, w in enumerate(self.l_list):
+            #if w["mark"] == "A":  # put window with mark A in right list
+        self.r_list.append(self.l_list.pop(0))
 
-        self.move_away(self.l_list, "A", "right")
-        self.maketabbedcontainer(mark="A")
+        self.move_away(self.l_list, self.r_list[0]['mark'], "right")
+        self.maketabbedcontainer(self.r_list[0]['mark'])
 
+        print(self.l_list)
+        print('--------------')
+        print(self.r_list)
         # show list item in QtListWidget
         self.l_Qlist.addItems([w["name"] for w in self.l_list])
         self.r_Qlist.addItems([w["name"] for w in self.r_list])
+
+    def mark_window(self, win):
+
+        mark = win['id']
+        win['mark'] = mark
+        i3_cmd = f"[id={win['id']}] mark {mark}"
+        cmd = f'i3-msg "{i3_cmd}"'
+        subprocess.check_output(cmd, shell=True)
+
+        return mark
 
     def mark_windows(self, w_list):
 
         # Mark all windows (see i3wm doc for mark)
         alph = "ABCDEFGHIJKLMNOPQRSTU"
         for mark, win in zip(alph, w_list):
-            win["mark"] = mark
+            win["mark"] = win['id'] #mark
             i3_cmd = f"[id={win['id']}] mark {mark}"
             cmd = f'i3-msg "{i3_cmd}"'
             subprocess.check_output(cmd, shell=True)
@@ -93,7 +149,8 @@ class LayoutMgr(QDialog):
     def move_away(self, el, mark, direction):
         """ put window with {mark} out of any container toward {direction} """
 
-        nb_step = len(el) +1 # jump all window + 1 to get out of container
+        nb_step = len(el) +3 # jump all window + 1 to get out of container
+        print(len(el))
         cmd = f'''i3-msg "[con_mark="{mark}"] move {direction}"'''
         for i in range(nb_step):
             subprocess.check_output(cmd, shell=True)
@@ -142,13 +199,13 @@ class LayoutMgr(QDialog):
             direction="left",
         )
 
-    def move(self, sQl, eQl, sl, el, direction):
+    def move(self, sQl, eQl, sl, el, direction, switch_tabbed=False):
 
         # get selected window
         i = sQl.currentRow()
 
         # if only one window left : swap containers
-        if len(sl) == 1:
+        if len(sl) == 1 and not self.tabbed:
             mark = sl[0]["mark"]
             self.move_away(el, mark, direction)
             self.swap_list(sQl, eQl, sl, el)
