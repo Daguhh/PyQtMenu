@@ -16,11 +16,13 @@ import subprocess
 
 from PyQt5.QtCore import QSize
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap, QIcon, QFont #QStaticText, QColor,
+from PyQt5.QtCore import QThreadPool, QRunnable, pyqtSlot
 from PyQt5.QtWidgets import (
-    QInputDialog,
+    #QInputDialog,
     QDialog,
-    QLineEdit,
-    QSpacerItem,
+    #QLineEdit,
+    #QSpacerItem,
     QMainWindow,
     QScrollArea,
     QWidget,
@@ -32,19 +34,19 @@ from PyQt5.QtWidgets import (
     QApplication,
     QPushButton,
     QGridLayout,
-    QTextEdit,
-    QDesktopWidget,
+    #QTextEdit,
+    #QDesktopWidget,
     QSizePolicy,
     QGraphicsOpacityEffect,
-    QListWidgetItem,
+    #QListWidgetItem,
     QFrame,
+    QCheckBox,
 )
-from PyQt5.QtGui import QPixmap, QIcon, QStaticText, QColor, QFont
-from PyQt5.QtCore import QThreadPool, QRunnable, pyqtSlot
 
 from .parse_desktop_file import get_app_from_desktop, parse_desktop_lang
 from .qss import APP_BUTTON_QSS, APP_LABEL_QSS, APP_LAUNCHER_QSS
 from .layout_manager.layout_manager_tab import LayoutMgr
+from .dialogs import AskMultipleValues
 
 
 class MainWindow(QMainWindow):
@@ -66,6 +68,9 @@ class MainWindow(QMainWindow):
 
     def initUI(self):
 
+        ######## Status bar ###########
+        self.statusBar()
+
         ######## Menubar ############
         exitAct = QAction(text="&Exit", parent=self)
         exitAct.setShortcut("Ctrl+Q")
@@ -74,15 +79,18 @@ class MainWindow(QMainWindow):
 
         resizeiconAct = QAction(text="&Resize Icons", parent=self)
         resizeiconAct.triggered.connect(self.resize_icons)
-        self.statusBar()
 
         self.reducemodAct = QAction("Masquer", self, checkable=True)
-        self.reducemodAct.setStatusTip("Cache le menu au lancement d'une application")
+        self.reducemodAct.setStatusTip(
+            "Réduit le menu au lancement d'une application"
+        )
         self.reducemodAct.setChecked(True)
 
         menubar = self.menuBar()
+
         fileMenu = menubar.addMenu("&Fichier")
         fileMenu.addAction(exitAct)
+
         EditMenu = menubar.addMenu("&Edition")
         EditMenu.addAction(resizeiconAct)
         EditMenu.addAction(self.reducemodAct)
@@ -97,17 +105,31 @@ class MainWindow(QMainWindow):
         reduceBtn.setFont(QFont("Times", 80))
         reduceBtn.clicked.connect(MainWindow.reduce_mainwindow)
 
-        splitBtn = QPushButton("Split")
-        splitBtn.setToolTip("place les fenêtres côte à cote à la verticale")
-        splitBtn.clicked.connect(self.toogle_layout)
+#        splitBtn = QPushButton("Split")
+#        splitBtn.setToolTip("place les fenêtres côte à cote à la verticale")
+#        splitBtn.clicked.connect(self.toogle_layout)
+#
+#        twopanelBtn = QPushButton("2 panel")
+#        twopanelBtn.setToolTip("dispose les fenêtes sous forme de deux panneaux")
 
-        twopanelBtn = QPushButton("2 panel")
-        twopanelBtn.setToolTip("dispose les fenêtes sous forme de deux panneaux")
+        self.twopanelCb = QCheckBox("Vue à deux panneaux")
+        self.twopanelCb.setToolTip(
+            "Disposer les fenêtres en deux panneaux séparées verticalement"
+        )
+        self.twopanelCb.setChecked(False)
+        self.twopanelCb.stateChanged.connect(self.toogle_layout)
+
+        self.reduceCb = QCheckBox("Réduire le menu")
+        self.reduceCb.setToolTip(
+            "Réduire le menu au lancement d'une application"
+        )
+        self.reduceCb.setChecked(True)
+        #self.reduceCb.stateChanged.connect(self.)
 
         hbox = QHBoxLayout()
         hbox.addWidget(reduceBtn)
-        hbox.addWidget(splitBtn)
-        hbox.addWidget(twopanelBtn)
+        hbox.addWidget(self.twopanelCb)
+        hbox.addWidget(self.reduceCb)
 
         vbox = QVBoxLayout()
         vbox.addLayout(hbox)
@@ -117,7 +139,10 @@ class MainWindow(QMainWindow):
         ########### Tabs launchers ####################
         # create tab
         self.table_widget = TabsContainer(parent=self)
-        twopanelBtn.clicked.connect(self.table_widget.layout_mgr.refresh)
+        self.layout_mgr = LayoutMgr()
+        self.table_widget.addtabmodule(self.layout_mgr, "layout")
+
+        self.twopanelCb.stateChanged.connect(self.layout_mgr.refresh)
         vbox.addWidget(self.table_widget)
 
         self.show()
@@ -139,7 +164,7 @@ class MainWindow(QMainWindow):
 
     @classmethod
     def reduce_mainwindow(cls):
-        if cls.instance.reducemodAct.isChecked() == False:
+        if cls.instance.reduceCb.isChecked() == False:
             return
         dialog = ReduceModButton()
         MainWindow.instance.hide()
@@ -196,53 +221,6 @@ class ReduceModButton(QDialog):
         self.setWindowFlags(Qt.FramelessWindowHint)
 
 
-class AskMultipleValues(QDialog):
-    """ Dialog to resize icon """
-
-    def __init__(self, *args, **kwargs):
-
-        super(QDialog, self).__init__()
-        self.layout = QGridLayout(self)  # QVBoxLayout(self)
-        self.textEdits = []
-
-        for i, item in enumerate(args):
-            text = QLabel(item)
-            textEdit = QLineEdit()
-            self.textEdits.append(textEdit)
-            self.layout.addWidget(text, i, 0)
-            self.layout.addWidget(textEdit, i, 1, 1, 2)
-
-        ok_btn = QPushButton("Ok")
-        ok_btn.clicked.connect(self.accept)
-
-        cancel_btn = QPushButton("Cancel")
-        cancel_btn.clicked.connect(self.close)
-
-        self.layout.addWidget(cancel_btn, i + 1, 1)
-        self.layout.addWidget(ok_btn, i + 1, 2)
-
-    def keyPressEvent(self, e):
-        if e.key() == Qt.Key_Return:
-            self.accept()
-        elif e.key() == Qt.Key_Escape:
-            self.close()
-
-    def get_values(self):
-        vals = []
-        for textEdit in self.textEdits:
-            vals.append(textEdit.text())
-        try:
-            if any([int(val) >= 1 for val in vals]):
-                return (*vals, True)
-            else:
-                raise ValueError("Size must be >= 1")
-        except ValueError as e:
-            print(f"{e}\nwrong value for icon size")
-            return 0, 0, False
-
-    def cancel(self):
-        return 0, 0, False
-
 
 class TabsContainer(QWidget):
     """
@@ -270,7 +248,7 @@ class TabsContainer(QWidget):
             self.tabs.addTab(tab, name)
 
         # add module tab
-        self.addtabmodule()
+        #self.addtabmodule()
 
         # Fill tabs with apps with launchers
         for app in app_list:
@@ -281,12 +259,11 @@ class TabsContainer(QWidget):
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
 
-    def addtabmodule(self):
+    def addtabmodule(self, module, tab_name):
 
         # add a tab for layout management (i3module)
-        self.layout_mgr = LayoutMgr()
-        name = "layout"
-        self.tabs.addTab(self.layout_mgr, name)
+        #self.modules.append(module())
+        self.tabs.addTab(module, tab_name)
 
 
 class ScrollTab(QScrollArea):
