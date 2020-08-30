@@ -119,7 +119,7 @@ class LayoutMgr(QWidget):
         self.r_list.append(self.l_list.pop(0))
 
         self.move_away(self.l_list, self.r_list[0]['mark'], "right")
-        self.maketabbedcontainer(self.r_list[0]['mark'])
+        #self.maketabbedcontainer(self.r_list[0]['mark'])
 
         print(self.l_list)
         print('--------------')
@@ -211,7 +211,7 @@ class LayoutMgr(QWidget):
             mark = sl[0]["mark"]
             self.move_away(el, mark, direction)
             self.swap_list(sQl, eQl, sl, el)
-            self.maketabbedcontainer(mark)
+            #self.maketabbedcontainer(mark)
 
         else:
             w = sl[i]
