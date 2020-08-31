@@ -9,6 +9,9 @@ import os
 import glob
 import re
 from itertools import product
+import hashlib
+import json
+
 
 from .config import ICON_PATHS, ICON_THEME, ICON_SIZES, ICON_DEFAULT
 
@@ -16,22 +19,48 @@ from .config import ICON_PATHS, ICON_THEME, ICON_SIZES, ICON_DEFAULT
 def get_app_for_folder():
     pass
 
+def hash_file(file):
+
+    hasher = hashlib.md5()
+    with open(file, 'rb') as f:
+        buf = f.read()
+        hasher.update(buf)
+    return hasher.hexdigest()
+
 
 def get_app_from_desktop():
     """
     get all app dict and store them in a list
     """
 
+    with open("config.json") as json_data_file:
+        saved_app = json.load(json_data_file)
+
     app_list = []
+    app_dct = {}
 
     path_desktop = "Apps/*/*.desktop"
     for file in glob.iglob(path_desktop):
-        app = parse_desktop_lang(file)
 
-        category = file.split('/')[-2]
-        app['category'] = category
+        hex_hash = hash_file(file)
+        if not hex_hash in list(saved_app.keys()):
+
+            app = parse_desktop_lang(file)
+
+            category = file.split('/')[-2]
+            app['category'] = category
+
+        else:
+            app = saved_app[hex_hash]
 
         app_list += [app]
+        app_dct[hex_hash] = app
+
+    with open("config.json", "w") as outfile:
+        json.dump(app_dct, outfile)
+
+    for app in app_list:
+        app['Exec'] = txt2fct(app['Exec'])
 
     return app_list
 
@@ -92,11 +121,11 @@ def parse_desktop_lang(file_name, lang='fr'):
         dict : parsed desktop file into dict
     """
 
-    entry_names_tr = ['Name', 'Comment']
+    entry_names_lang = ['Name', 'Comment']
     entry_names = ['Exec', 'Icon']
 
     app = {}
-    for name in entry_names_tr:
+    for name in entry_names_lang:
         pattern = create_pattern(name, lang)
         match = find_in_file(file_name, pattern)
 
@@ -113,7 +142,7 @@ def parse_desktop_lang(file_name, lang='fr'):
         app[name] = match
 
 
-    app['Exec'] = txt2fct(app['Exec'])
+    #app['Exec'] = txt2fct(app['Exec'])
     app['Icon'] = icon2path(app['Icon'])
     return app
 
