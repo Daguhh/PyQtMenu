@@ -41,6 +41,7 @@ from PyQt5.QtWidgets import (
     #QListWidgetItem,
     QFrame,
     QCheckBox,
+    QMessageBox,
 )
 
 from .parse_desktop_file import get_app_from_desktop, parse_desktop_lang
@@ -58,7 +59,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.title = "PyQtMenu"
         self.setWindowTitle(self.title)
-        self.isSplit = False
+        #self.isSplit = False
         #        self.setStyleSheet("""
         # """)
         # self.setMouseTracking(True)
@@ -118,7 +119,7 @@ class MainWindow(QMainWindow):
         )
         self.twopanelCb.setIcon(QIcon('ui/icons/dual_panel.png'))
         self.twopanelCb.setChecked(False)
-        self.twopanelCb.stateChanged.connect(self.toogle_layout)
+        #self.twopanelCb.stateChanged.connect(self.toogle_layout)
 
         self.reduceCb = QCheckBox()#"Réduire le menu")
         self.reduceCb.setIcon(QIcon('ui/icons/reduce.png'))
@@ -149,17 +150,41 @@ class MainWindow(QMainWindow):
         self.layout_mgr = LayoutMgr()
         self.table_widget.addtabmodule(self.layout_mgr, "layout")
 
+        # check if i3wm is running
+        cmd = r'wmctrl -m | sed -nr "s/Name: (.*)/\1/p"'
+        wm_name = subprocess.check_output(cmd, shell=True, text=True).rstrip()
+        if wm_name != "i3":
+            self.twopanelCb.setDisabled(True)
+            self.twopanelCb.setToolTip("Dual Panel module : please install and run i3wm")
+            self.layout_mgr.setToolTip("Dual Panel module : please install and run i3wm")
+
         self.twopanelCb.stateChanged.connect(self.layout_mgr.refresh)
         vbox.addWidget(self.table_widget)
 
         self.show()
 
     def toogle_layout(self):
-        if self.isSplit:
-            os.system("""i3-msg "layout tabbed" """)
-        else:
-            os.system("""i3-msg "layout splith" """)
-        self.isSplit = not self.isSplit
+        return
+#        cmd = "wmctrl -m | sed -n 's/Name: //p'"
+#        wm_name = subprocess.check_output(cmd, shell=True, text=True)
+#        if wm_name != "i30":
+#             msg = QMessageBox()
+#             msg.setIcon(QMessageBox.Information)
+#             msg.setText("Wrong environnement")
+#             msg.setInformativeText("Please ensure you run i3 window manager")
+#             msg.setWindowTitle("Optionnal module")
+#             msg.setDetailedText("""To benefit of dual panel view, please install and run i3wm""")
+#             msg.setStandardButtons(QMessageBox.Ok)
+#             #msg.buttonClicked.connect(msgbtn)
+#
+#             msg.exec_()
+#
+#        else:
+#            if self.isSplit:
+#                os.system("""i3-msg "layout tabbed" """)
+#            else:
+#                os.system("""i3-msg "layout splith" """)
+#            self.isSplit = not self.isSplit
 
     def get_size_value(self, *args):
         dialog = AskMultipleValues(*args)

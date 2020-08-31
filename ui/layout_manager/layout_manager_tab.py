@@ -29,6 +29,7 @@ class LayoutMgr(QWidget):
         #self.ui.hbox.setWidgetResizable(True)
 
         self.tabbed = True
+        self.setDisabled(True)
 
         # list list
         self.l_Qlist = self.ui.leftlistWidget
@@ -73,6 +74,7 @@ class LayoutMgr(QWidget):
 
         if self.sender().isChecked():
 
+            self.setEnabled(True)
             self.tabbed = False
             self.l_Qlist.clear()
             self.r_Qlist.clear()
@@ -84,6 +86,7 @@ class LayoutMgr(QWidget):
             print("====== activated =========")
 
         else:
+            self.setDisabled(True)
             self.tabbed = True
             for i in range(len(self.l_list)):
                 #time.sleep(3)
