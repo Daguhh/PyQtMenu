@@ -54,8 +54,7 @@ def icon2path(icon_name):
     elif os.path.isfile(icon_name):
         icon_path = icon_name
     else:
-        t = ICON_THEME
-        for s, p in product(ICON_SIZES, ICON_PATHS):
+        for t, s, p in product(ICON_THEME, ICON_SIZES, ICON_PATHS):
             icon_tmp = glob.glob(f'{p}/{t}/{s}x{s}/*/{icon_name}.*')
             if icon_tmp:
                 icon_path = icon_tmp[0]
