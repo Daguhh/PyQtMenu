@@ -13,10 +13,11 @@ import os
 from itertools import product, count
 import sip
 import subprocess
+import base64
 
 from PyQt5.QtCore import QSize
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap, QIcon, QFont  # QStaticText, QColor,
+from PyQt5.QtCore import Qt, QByteArray
+from PyQt5.QtGui import QPixmap, QIcon, QFont, QImage  # QStaticText, QColor,
 from PyQt5.QtCore import QThreadPool, QRunnable, pyqtSlot
 from PyQt5.QtWidgets import (
     # QInputDialog,
@@ -48,7 +49,13 @@ from .parse_desktop_file import get_app_from_desktop, parse_desktop_lang
 from .qss import APP_BUTTON_QSS, APP_LABEL_QSS, APP_LAUNCHER_QSS
 from .layout_manager.layout_manager_tab import LayoutMgr
 from .dialogs import AskMultipleValues
+from .config import DUAL_PANEL_ICON, REDUCE_ICON
 
+def iconFromBase64(base64):
+    pixmap = QPixmap()
+    pixmap.loadFromData(QByteArray.fromBase64(base64))
+    icon = QIcon(pixmap)
+    return icon
 
 class MainWindow(QMainWindow):
 
@@ -96,12 +103,13 @@ class MainWindow(QMainWindow):
         self.twopanelCb.setToolTip(
             "Disposer les fenêtres en deux panneaux séparées verticalement"
         )
-        self.twopanelCb.setIcon(QIcon("ui/icons/dual_panel.png"))
+        #icon = QImage().loadFromData(QByteArray().fromBase64(DUAL_PANEL_ICON))
+        self.twopanelCb.setIcon(iconFromBase64(DUAL_PANEL_ICON))#QIcon("ui/icons/dual_panel.png"))
         self.twopanelCb.setChecked(False)
 
         # Toggle reduce mode
         self.reduceCb = QCheckBox()  # "Réduire le menu")
-        self.reduceCb.setIcon(QIcon("ui/icons/reduce.png"))
+        self.reduceCb.setIcon(QIcon(iconFromBase64(REDUCE_ICON)))#:w"ui/icons/reduce.png"))
         self.reduceCb.setToolTip("Réduire le menu au lancement d'une application")
         self.reduceCb.setChecked(True)
 
