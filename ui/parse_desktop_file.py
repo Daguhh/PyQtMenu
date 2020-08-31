@@ -13,7 +13,10 @@ import hashlib
 import json
 
 
-from .config import ICON_PATHS, ICON_THEME, ICON_SIZES, ICON_DEFAULT
+from .config import (
+    ICON_PATHS, ICON_THEME, ICON_SIZES, ICON_DEFAULT,
+    CONFIG_PATH, APP_SAVE_FILE
+)
 
 
 def get_app_for_folder():
@@ -33,8 +36,14 @@ def get_app_from_desktop():
     get all app dict and store them in a list
     """
 
-    with open("config.json") as json_data_file:
-        saved_app = json.load(json_data_file)
+    app_config_file = CONFIG_PATH + APP_SAVE_FILE
+    try:
+        with open(app_config_file) as json_data_file:
+            saved_app = json.load(json_data_file)
+    except FileNotFoundError as e:
+        print(e)
+        print('hahaha')
+        saved_app = {}
 
     app_list = []
     app_dct = {}
@@ -49,6 +58,7 @@ def get_app_from_desktop():
 
             category = file.split('/')[-2]
             app['category'] = category
+            print('par là!!!!!!!!!!!!!!!!!!!!!!!')
 
         else:
             app = saved_app[hex_hash]
@@ -56,7 +66,7 @@ def get_app_from_desktop():
         app_list += [app]
         app_dct[hex_hash] = app
 
-    with open("config.json", "w") as outfile:
+    with open(app_config_file, "w") as outfile:
         json.dump(app_dct, outfile)
 
     for app in app_list:
