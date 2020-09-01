@@ -13,7 +13,6 @@ import os
 from itertools import product, count
 import sip
 import subprocess
-import base64
 
 from PyQt5.QtCore import QSize
 from PyQt5.QtCore import Qt, QByteArray
@@ -49,7 +48,8 @@ from .parse_desktop_file import get_app_from_desktop, parse_desktop_lang
 from .qss import APP_BUTTON_QSS, APP_LABEL_QSS, APP_LAUNCHER_QSS
 from .layout_manager.layout_manager_tab import LayoutMgr
 from .dialogs import AskMultipleValues
-from .config import DUAL_PANEL_ICON, REDUCE_ICON, ICON_THEMES
+from .config import DUAL_PANEL_ICON, REDUCE_ICON
+from load_config import CONFIG
 
 def iconFromBase64(base64):
     pixmap = QPixmap()
@@ -67,6 +67,9 @@ class MainWindow(QMainWindow):
         self.title = "PyQtMenu"
         self.setWindowTitle(self.title)
         MainWindow.instance = self
+        x = int(CONFIG['Window']['x'])
+        y = int(CONFIG['Window']['y'])
+        self.resize(x,y)
 
         self.initUI()
         self.enable_modules()
@@ -83,6 +86,10 @@ class MainWindow(QMainWindow):
         exitAct.setStatusTip("Exit application")
         exitAct.triggered.connect(QApplication.quit)
 
+        saveAct = QAction(text="Save config", parent=self)
+        saveAct.setStatusTip("Save menu configuration")
+        saveAct.triggered.connect(self.save_config)
+
         #  Resize icons
         resizeiconAct = QAction(text="&Resize Icons", parent=self)
         resizeiconAct.triggered.connect(self.resize_icons)
@@ -91,12 +98,13 @@ class MainWindow(QMainWindow):
         menubar = self.menuBar()
         fileMenu = menubar.addMenu("&Fichier")
         fileMenu.addAction(exitAct)
+        fileMenu.addAction(saveAct)
         EditMenu = menubar.addMenu("&Edition")
         EditMenu.addAction(resizeiconAct)
         themeMenu = EditMenu.addMenu("Icon theme")
 
         # Change icon theme
-        for theme in ICON_THEMES.keys():
+        for theme in CONFIG['Themes']:
             iconAct = QAction(text=theme, parent=self)
             iconAct.triggered.connect(self.set_icon_theme)
             themeMenu.addAction(iconAct)
@@ -118,13 +126,14 @@ class MainWindow(QMainWindow):
             "Disposer les fenêtres en deux panneaux séparées verticalement"
         )
         self.twopanelCb.setIcon(iconFromBase64(DUAL_PANEL_ICON))
-        self.twopanelCb.setChecked(False)
+        CONFIG['Options'].getboolean('autoclose')
+        self.twopanelCb.setChecked(CONFIG['Options'].getboolean('dualpanel'))
 
         # Toggle reduce mode
         self.reduceCb = QCheckBox()  # "Réduire le menu")
         self.reduceCb.setIcon(QIcon(iconFromBase64(REDUCE_ICON)))
         self.reduceCb.setToolTip("Réduire le menu au lancement d'une application")
-        self.reduceCb.setChecked(True)
+        self.reduceCb.setChecked(CONFIG['Options'].getboolean('autoclose'))
 
         #### Tabs  ####
         # Create app launcher tabs
@@ -150,6 +159,14 @@ class MainWindow(QMainWindow):
         vbox.addWidget(self.table_widget)
 
         self.show()
+
+    def save_config(self):
+
+        CONFIG['Options']['autoclose'] = str(self.reduceCb.isChecked())
+        CONFIG['Options']['dualpanel'] = str(self.twopanelCb.isChecked())
+
+        with open('config.ini', 'w') as configfile:
+            CONFIG.write(configfile)
 
     def enable_modules(self):
 
@@ -188,7 +205,10 @@ class MainWindow(QMainWindow):
 
     def resize_icons(self):
         x, y, test = self.get_size_value("x", "y")
+        CONFIG['Icon']['x'] = x
+        CONFIG['Icon']['y'] = y
         x, y = int(x), int(y)
+
         if test:
             for launcher in AppLauncherBtn.instances.values():
                 launcher.resize_icons(x, y)
@@ -199,11 +219,16 @@ class MainWindow(QMainWindow):
     def set_icon_theme(self):
         #theme = 'Faba'
         theme = self.sender().text()
+        CONFIG['Icon']['theme'] = theme
 
         for launcher in AppLauncherBtn.instances.values():
             launcher.set_icon_theme(theme)
 
+    def resizeEvent(self, event):
 
+        x, y = self.size().width(), self.size().height()
+        CONFIG['Window']['x'] = str(x)
+        CONFIG['Window']['y'] = str(y)
 
 
 class ReduceModButton(QDialog):
@@ -253,7 +278,9 @@ class TabsContainer(QWidget):
 
         # Initialize tab screen
         self.tabs = QTabWidget()
-        self.tabs.resize(600, 400)
+        x = int(CONFIG['Window']['x'])
+        y = int(CONFIG['Window']['y'])
+        #self.tabs.resize(x, y)
 
         # get all apps
         app_list = get_app_from_desktop()
@@ -277,6 +304,7 @@ class TabsContainer(QWidget):
     def addtabmodule(self, module, tab_name):
 
         self.tabs.addTab(module, tab_name)
+
 
 
 class ScrollTab(QScrollArea):
@@ -327,7 +355,9 @@ class Tab(QWidget):
         self.max_launcher = 100  # useless?
         self.gen_position = self.genPos()
 
-        self.launcher_size = (100, 50)
+        x = int(CONFIG['Icon']['x'])
+        y = int(CONFIG['Icon']['y'])
+        self.launcher_size = (x, y)
 
         self.setMinimumWidth((self.launcher_size[0] * 1.3))
 
@@ -406,7 +436,7 @@ class AppLauncherBtn(QFrame):
         self.setStyleSheet(APP_LAUNCHER_QSS)
 
         name, self.icons, tooltip = app["Name"], app["Icon"], app["Comment"]
-        icon = self.icons['Moka']
+        icon = self.icons[CONFIG['Icon']['theme']]
 
         self.btn = QPushButton()
         self.btn.setIcon(QIcon(QPixmap(icon)))

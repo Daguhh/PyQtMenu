@@ -14,9 +14,10 @@ import json
 
 
 from .config import (
-    ICON_PATHS, ICON_THEMES, ICON_SIZES, ICON_DEFAULT_DCT,
-    CONFIG_PATH, APP_SAVE_FILE
+    ICON_PATHS, ICON_SIZES,
+    CONFIG_PATH, APP_SAVE_FILE, ICON_DEFAULT
 )
+from load_config import CONFIG
 
 
 def get_app_for_folder():
@@ -68,6 +69,7 @@ def get_app_from_desktop():
     with open(app_config_file, "w") as outfile:
         json.dump(app_dct, outfile)
 
+    # python function is not serializable so add to be done after loadin json
     for app in app_list:
         app['Exec'] = txt2fct(app['Exec'])
 
@@ -86,24 +88,21 @@ def icon2paths(icon_name):
         - if icon_name is path to icon, do nothing
         - if not look for icon in file system
     """
-    icon_path = ICON_DEFAULT_DCT
+    icon_path = {theme:ICON_DEFAULT for theme in CONFIG['Themes']}
     if not icon_name:
         pass
     elif os.path.isfile(icon_name):
-        for theme in ICON_THEMES.keys():
+        for theme in CONFIG['Themes']:
             icon_path[theme] = icon_name
     else:
-        for theme, theme_paths in ICON_THEMES.items():
+        for theme in CONFIG['Themes']:
+            theme_paths = CONFIG['Themes'][theme].replace(' ','').split(',')
             for t, s, p in product(theme_paths, ICON_SIZES, ICON_PATHS):
                 icon_tmp = glob.glob(f'{p}/{t}/{s}x{s}/*/{icon_name}.*')
                 if icon_tmp:
                     icon_path[theme] = icon_tmp[0]
                     break
-    #print('***********************')
-    #print(icon_path)
     return icon_path
-
-            #icon = glob.glob(f'/usr/share/icons/hicolor/128x128/*/{icon}.*')[0]
 
 def create_pattern(entry, lang=None):
     if lang != None:
@@ -151,9 +150,6 @@ def parse_desktop_lang(file_name, lang='fr'):
         match = find_in_file(file_name, pattern)
 
         app[name] = match
-
-    #print(app['Icon'])
-
 
     return app
 
