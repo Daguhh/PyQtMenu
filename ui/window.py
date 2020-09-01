@@ -3,27 +3,27 @@
 
 
 """
-Project desciption
+A simple menu to display .desktop files.
+Powered by PyQt5.
 
 @Author = Daguhh
 """
 
+# Standard
 import sys
 import os
 from itertools import product, count
-import sip
 import subprocess
 import time
+# import sip
 
+# Installed
 from PyQt5.QtCore import QSize
 from PyQt5.QtCore import Qt, QByteArray
 from PyQt5.QtGui import QPixmap, QIcon, QFont, QImage  # QStaticText, QColor,
 from PyQt5.QtCore import QThreadPool, QRunnable, pyqtSlot
 from PyQt5.QtWidgets import (
-    # QInputDialog,
     QDialog,
-    # QLineEdit,
-    # QSpacerItem,
     QMainWindow,
     QScrollArea,
     QWidget,
@@ -35,73 +35,60 @@ from PyQt5.QtWidgets import (
     QApplication,
     QPushButton,
     QGridLayout,
-    # QTextEdit,
-    # QDesktopWidget,
     QSizePolicy,
     QGraphicsOpacityEffect,
-    # QListWidgetItem,
     QFrame,
     QCheckBox,
     QMessageBox,
 )
 
+# QLineEdit,
+# QSpacerItem,
+# QTextEdit,
+# QDesktopWidget,
+# QListWidgetItem,
+# QInputDialog,
+
+# Local
 from .parse_desktop_file import get_app_from_desktop, parse_desktop_lang
 from .qss import APP_BUTTON_QSS, APP_LABEL_QSS, APP_LAUNCHER_QSS
 from .layout_manager.layout_manager_tab import LayoutMgr
 from .dialogs import AskMultipleValues
-from config import DUAL_PANEL_ICON, REDUCE_ICON, MENU_TITLE, USER_CONFIG, CONFIG_PATH, DEFAULT_CONF_INI, APP_SAVE_FILE
-from load_config import CONFIG
+from config import (
+    DUAL_PANEL_ICON,
+    REDUCE_ICON,
+    MENU_TITLE,
+    USER_CONFIG,
+    CONFIG_PATH,
+    DEFAULT_CONF_INI,
+    APP_SAVE_FILE,
+    CONFIG,
+)
 
-def iconFromBase64(base64):
-    pixmap = QPixmap()
-    pixmap.loadFromData(QByteArray.fromBase64(base64))
-    icon = QIcon(pixmap)
-    return icon
+# from load_config import CONFIG
 
-def restart_program():
-
-    python = sys.executable
-    os.execl(python, python, * sys.argv)
-
-def make_configs():
-
-    print('=========== make conf ====================')
-
-    print(DEFAULT_CONF_INI)
-    print(USER_CONFIG)
-    if not os.path.isdir(CONFIG_PATH):
-        os.makedirs(CONFIG_PATH)
-    if not os.path.exists(USER_CONFIG):
-        with open(USER_CONFIG, 'w') as user_conf:
-            print(DEFAULT_CONF_INI)
-            user_conf.write(DEFAULT_CONF_INI)
-        restart_program()
-    if not os.path.exists(APP_SAVE_FILE):
-        pass
 
 class MainWindow(QMainWindow):
 
-    # bigpicture = True
     instance = None
 
     def __init__(self):
+
         super().__init__()
         self.title = MENU_TITLE
         self.setWindowTitle(self.title)
         MainWindow.instance = self
 
+        # Create conf files if do not exist
         make_configs()
-
-        x = int(CONFIG['Window']['x'])
-        y = int(CONFIG['Window']['y'])
-        self.resize(x,y)
-
-
+        # Load conf files
+        self.load_config()
 
         self.initUI()
         self.enable_modules()
 
     def initUI(self):
+        """Create main window"""
 
         #### Status bar ####
         self.statusBar()
@@ -131,7 +118,7 @@ class MainWindow(QMainWindow):
         themeMenu = EditMenu.addMenu("Icon theme")
 
         # Change icon theme
-        for theme in CONFIG['Themes']:
+        for theme in CONFIG["Themes"]:
             iconAct = QAction(text=theme, parent=self)
             iconAct.triggered.connect(self.set_icon_theme)
             themeMenu.addAction(iconAct)
@@ -153,14 +140,14 @@ class MainWindow(QMainWindow):
             "Disposer les fenêtres en deux panneaux séparées verticalement"
         )
         self.twopanelCb.setIcon(iconFromBase64(DUAL_PANEL_ICON))
-        CONFIG['Options'].getboolean('autoclose')
-        self.twopanelCb.setChecked(CONFIG['Options'].getboolean('dualpanel'))
+        CONFIG["Options"].getboolean("autoclose")
+        self.twopanelCb.setChecked(CONFIG["Options"].getboolean("dualpanel"))
 
         # Toggle reduce mode
         self.reduceCb = QCheckBox()  # "Réduire le menu")
         self.reduceCb.setIcon(QIcon(iconFromBase64(REDUCE_ICON)))
         self.reduceCb.setToolTip("Réduire le menu au lancement d'une application")
-        self.reduceCb.setChecked(CONFIG['Options'].getboolean('autoclose'))
+        self.reduceCb.setChecked(CONFIG["Options"].getboolean("autoclose"))
 
         #### Tabs  ####
         # Create app launcher tabs
@@ -187,15 +174,24 @@ class MainWindow(QMainWindow):
 
         self.show()
 
+    def load_config(self):
+        """Load user-defined MainWindow paramerters"""
+
+        x = int(CONFIG["Window"]["x"])
+        y = int(CONFIG["Window"]["y"])
+        self.resize(x, y)
+
     def save_config(self):
+        """Save user preferences in a text file"""
 
-        CONFIG['Options']['autoclose'] = str(self.reduceCb.isChecked())
-        CONFIG['Options']['dualpanel'] = str(self.twopanelCb.isChecked())
+        CONFIG["Options"]["autoclose"] = str(self.reduceCb.isChecked())
+        CONFIG["Options"]["dualpanel"] = str(self.twopanelCb.isChecked())
 
-        with open(USER_CONFIG, 'w') as configfile:
+        with open(USER_CONFIG, "w") as configfile:
             CONFIG.write(configfile)
 
     def enable_modules(self):
+        """Enable optional modules"""
 
         # check if i3wm is running
         cmd = r'wmctrl -m | sed -nr "s/Name: (.*)/\1/p"'
@@ -210,6 +206,8 @@ class MainWindow(QMainWindow):
             )
 
     def get_size_value(self, *args):
+        """Get new icon size from dialog"""
+
         dialog = AskMultipleValues(*args)
         if dialog.exec_():
             vals = dialog.get_values()
@@ -219,8 +217,10 @@ class MainWindow(QMainWindow):
 
     @classmethod
     def reduce_mainwindow(cls):
-        if cls.instance.reduceCb.isChecked() == False:
-            return
+        """Toggle reduce mode and big picture from button activation"""
+
+        #if cls.instance.reduceCb.isChecked() == False:
+        #    return
         dialog = ReduceModButton()
         MainWindow.instance.hide()
         if dialog.exec_():
@@ -231,9 +231,11 @@ class MainWindow(QMainWindow):
         return
 
     def resize_icons(self):
+        """ resize all launchers icons, resize icon grid too"""
+
         x, y, test = self.get_size_value("x", "y")
-        CONFIG['Icon']['x'] = x
-        CONFIG['Icon']['y'] = y
+        CONFIG["Icon"]["x"] = x
+        CONFIG["Icon"]["y"] = y
         x, y = int(x), int(y)
 
         if test:
@@ -244,18 +246,20 @@ class MainWindow(QMainWindow):
                 tab.setMinimumWidth(int(x) + 20)
 
     def set_icon_theme(self):
-        #theme = 'Faba'
+        """Change all icon theme"""
+
         theme = self.sender().text()
-        CONFIG['Icon']['theme'] = theme
+        CONFIG["Icon"]["theme"] = theme
 
         for launcher in AppLauncherBtn.instances.values():
             launcher.set_icon_theme(theme)
 
     def resizeEvent(self, event):
+        """Capture new window size for saving purpose"""
 
         x, y = self.size().width(), self.size().height()
-        CONFIG['Window']['x'] = str(x)
-        CONFIG['Window']['y'] = str(y)
+        CONFIG["Window"]["x"] = str(x)
+        CONFIG["Window"]["y"] = str(y)
 
 
 class ReduceModButton(QDialog):
@@ -305,9 +309,9 @@ class TabsContainer(QWidget):
 
         # Initialize tab screen
         self.tabs = QTabWidget()
-        x = int(CONFIG['Window']['x'])
-        y = int(CONFIG['Window']['y'])
-        #self.tabs.resize(x, y)
+        x = int(CONFIG["Window"]["x"])
+        y = int(CONFIG["Window"]["y"])
+        # self.tabs.resize(x, y)
 
         # get all apps
         app_list = get_app_from_desktop()
@@ -331,7 +335,6 @@ class TabsContainer(QWidget):
     def addtabmodule(self, module, tab_name):
 
         self.tabs.addTab(module, tab_name)
-
 
 
 class ScrollTab(QScrollArea):
@@ -382,8 +385,8 @@ class Tab(QWidget):
         self.max_launcher = 100  # useless?
         self.gen_position = self.genPos()
 
-        x = int(CONFIG['Icon']['x'])
-        y = int(CONFIG['Icon']['y'])
+        x = int(CONFIG["Icon"]["x"])
+        y = int(CONFIG["Icon"]["y"])
         self.launcher_size = (x, y)
 
         self.setMinimumWidth((self.launcher_size[0] * 1.3))
@@ -463,7 +466,7 @@ class AppLauncherBtn(QFrame):
         self.setStyleSheet(APP_LAUNCHER_QSS)
 
         name, self.icons, tooltip = app["Name"], app["Icon"], app["Comment"]
-        icon = self.icons[CONFIG['Icon']['theme']]
+        icon = self.icons[CONFIG["Icon"]["theme"]]
 
         self.btn = QPushButton()
         self.btn.setIcon(QIcon(QPixmap(icon)))
@@ -494,11 +497,13 @@ class AppLauncherBtn(QFrame):
         self.threadpool.start(app_runner)
         MainWindow.reduce_mainwindow()
 
-    def remove(self):
-
-        self.layout.removeWidget(self.widget_name)
-        sip.delete(self.widget_name)
-        self.widget_name = None
+    #    def remove(self):
+    #
+    #        print('========= removed ================')
+    #
+    #        self.layout.removeWidget(self.widget_name)
+    #        sip.delete(self.widget_name)
+    #        self.widget_name = None
 
     def resize_icons(self, size_x, size_y):
 
@@ -509,7 +514,6 @@ class AppLauncherBtn(QFrame):
 
         icon = self.icons[theme]
         self.btn.setIcon(QIcon(QPixmap(icon)))
-
 
 
 class AppRunner(QRunnable):
@@ -525,8 +529,37 @@ class AppRunner(QRunnable):
         self.command()
 
 
+def iconFromBase64(base64):
+    """Read menu icon images from base64 string"""
+
+    pixmap = QPixmap()
+    pixmap.loadFromData(QByteArray.fromBase64(base64))
+    icon = QIcon(pixmap)
+    return icon
+
+def restart_program():
+    """Reload menu"""
+
+    python = sys.executable
+    os.execl(python, python, *sys.argv)
+
+def make_configs():
+    """Create config dir/files if they don't exist"""
+
+    if not os.path.isdir(CONFIG_PATH):
+        os.makedirs(CONFIG_PATH)
+    if not os.path.exists(USER_CONFIG):
+        with open(USER_CONFIG, "w") as user_conf:
+            user_conf.write(DEFAULT_CONF_INI)
+        print("========= Restarting =================")
+        restart_program()
+    if not os.path.exists(APP_SAVE_FILE):
+        pass
+
+
 if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     ex = MainWindow()
     sys.exit(app.exec_())
+
