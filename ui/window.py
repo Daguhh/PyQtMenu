@@ -198,11 +198,7 @@ class MainWindow(QMainWindow):
 
     def set_icon_theme(self):
         #theme = 'Faba'
-        print(self.sender())
-
         theme = self.sender().text()
-
-        print(ICON_THEME.keys())
 
         for launcher in AppLauncherBtn.instances.values():
             launcher.set_icon_theme(theme)
@@ -453,8 +449,6 @@ class AppLauncherBtn(QFrame):
         self.btn.setIconSize(QSize(size_x, size_y))
 
     def set_icon_theme(self, theme):
-
-        print('============================')
 
         icon = icon2path(self.icon, theme)
         self.btn.setIcon(QIcon(QPixmap(icon)))
