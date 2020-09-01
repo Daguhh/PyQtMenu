@@ -13,7 +13,7 @@ import hashlib
 import json
 
 
-from .config import (
+from config import (
     ICON_PATHS, ICON_SIZES,
     CONFIG_PATH, APP_SAVE_FILE, ICON_DEFAULT
 )
@@ -37,7 +37,7 @@ def get_app_from_desktop():
     get all app dict and store them in a list
     """
 
-    app_config_file = CONFIG_PATH + APP_SAVE_FILE
+    app_config_file = APP_SAVE_FILE
     try:
         with open(app_config_file) as json_data_file:
             saved_app = json.load(json_data_file)

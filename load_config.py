@@ -2,8 +2,10 @@
 
 import configparser
 
+from config import USER_CONFIG
+
 CONFIG = configparser.ConfigParser()
-CONFIG.read('config.ini')
+CONFIG.read(USER_CONFIG)
 
 
 

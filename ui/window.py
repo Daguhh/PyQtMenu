@@ -48,7 +48,7 @@ from .parse_desktop_file import get_app_from_desktop, parse_desktop_lang
 from .qss import APP_BUTTON_QSS, APP_LABEL_QSS, APP_LAUNCHER_QSS
 from .layout_manager.layout_manager_tab import LayoutMgr
 from .dialogs import AskMultipleValues
-from .config import DUAL_PANEL_ICON, REDUCE_ICON
+from config import DUAL_PANEL_ICON, REDUCE_ICON, MENU_TITLE, USER_CONFIG
 from load_config import CONFIG
 
 def iconFromBase64(base64):
@@ -64,7 +64,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.title = "PyQtMenu"
+        self.title = MENU_TITLE
         self.setWindowTitle(self.title)
         MainWindow.instance = self
         x = int(CONFIG['Window']['x'])
@@ -165,7 +165,7 @@ class MainWindow(QMainWindow):
         CONFIG['Options']['autoclose'] = str(self.reduceCb.isChecked())
         CONFIG['Options']['dualpanel'] = str(self.twopanelCb.isChecked())
 
-        with open('config.ini', 'w') as configfile:
+        with open(USER_CONFIG, 'w') as configfile:
             CONFIG.write(configfile)
 
     def enable_modules(self):
