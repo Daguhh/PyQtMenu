@@ -45,11 +45,11 @@ from PyQt5.QtWidgets import (
     QMessageBox,
 )
 
-from .parse_desktop_file import get_app_from_desktop, parse_desktop_lang
+from .parse_desktop_file import get_app_from_desktop, parse_desktop_lang, icon2path
 from .qss import APP_BUTTON_QSS, APP_LABEL_QSS, APP_LAUNCHER_QSS
 from .layout_manager.layout_manager_tab import LayoutMgr
 from .dialogs import AskMultipleValues
-from .config import DUAL_PANEL_ICON, REDUCE_ICON
+from .config import DUAL_PANEL_ICON, REDUCE_ICON, ICON_THEME
 
 def iconFromBase64(base64):
     pixmap = QPixmap()
@@ -87,6 +87,20 @@ class MainWindow(QMainWindow):
         resizeiconAct = QAction(text="&Resize Icons", parent=self)
         resizeiconAct.triggered.connect(self.resize_icons)
 
+        #  Create menubar
+        menubar = self.menuBar()
+        fileMenu = menubar.addMenu("&Fichier")
+        fileMenu.addAction(exitAct)
+        EditMenu = menubar.addMenu("&Edition")
+        EditMenu.addAction(resizeiconAct)
+        themeMenu = EditMenu.addMenu("Icon theme")
+
+        # Change icon theme
+        for theme in ICON_THEME.keys():
+            iconAct = QAction(text=theme, parent=self)
+            iconAct.triggered.connect(self.set_icon_theme)
+            themeMenu.addAction(iconAct)
+
         #### control panel ####
         window = QWidget()
         self.setCentralWidget(window)
@@ -103,13 +117,12 @@ class MainWindow(QMainWindow):
         self.twopanelCb.setToolTip(
             "Disposer les fenêtres en deux panneaux séparées verticalement"
         )
-        #icon = QImage().loadFromData(QByteArray().fromBase64(DUAL_PANEL_ICON))
-        self.twopanelCb.setIcon(iconFromBase64(DUAL_PANEL_ICON))#QIcon("ui/icons/dual_panel.png"))
+        self.twopanelCb.setIcon(iconFromBase64(DUAL_PANEL_ICON))
         self.twopanelCb.setChecked(False)
 
         # Toggle reduce mode
         self.reduceCb = QCheckBox()  # "Réduire le menu")
-        self.reduceCb.setIcon(QIcon(iconFromBase64(REDUCE_ICON)))#:w"ui/icons/reduce.png"))
+        self.reduceCb.setIcon(QIcon(iconFromBase64(REDUCE_ICON)))
         self.reduceCb.setToolTip("Réduire le menu au lancement d'une application")
         self.reduceCb.setChecked(True)
 
@@ -122,14 +135,6 @@ class MainWindow(QMainWindow):
         self.table_widget.addtabmodule(self.layout_mgr, "layout")
 
         self.twopanelCb.stateChanged.connect(self.layout_mgr.refresh)
-
-        #### Create UI ####
-        #  Create menubar
-        menubar = self.menuBar()
-        fileMenu = menubar.addMenu("&Fichier")
-        fileMenu.addAction(exitAct)
-        EditMenu = menubar.addMenu("&Edition")
-        EditMenu.addAction(resizeiconAct)
 
         # Window
         vbox = QVBoxLayout()
@@ -190,6 +195,19 @@ class MainWindow(QMainWindow):
             for tab in Tab.instances.values():
                 tab.launcher_size = (x, y)
                 tab.setMinimumWidth(int(x) + 20)
+
+    def set_icon_theme(self):
+        #theme = 'Faba'
+        print(self.sender())
+
+        theme = self.sender().text()
+
+        print(ICON_THEME.keys())
+
+        for launcher in AppLauncherBtn.instances.values():
+            launcher.set_icon_theme(theme)
+
+
 
 
 class ReduceModButton(QDialog):
@@ -391,7 +409,8 @@ class AppLauncherBtn(QFrame):
         self.setFixedSize(size[0] + 20, size[1] + 35)
         self.setStyleSheet(APP_LAUNCHER_QSS)
 
-        name, icon, tooltip = app["Name"], app["Icon"], app["Comment"]
+        name, self.icon, tooltip = app["Name"], app["Icon"], app["Comment"]
+        icon = icon2path(self.icon, 'Moka')
 
         self.btn = QPushButton()
         self.btn.setIcon(QIcon(QPixmap(icon)))
@@ -432,6 +451,14 @@ class AppLauncherBtn(QFrame):
 
         self.setFixedSize(size_x + 20, size_y + 35)
         self.btn.setIconSize(QSize(size_x, size_y))
+
+    def set_icon_theme(self, theme):
+
+        print('============================')
+
+        icon = icon2path(self.icon, theme)
+        self.btn.setIcon(QIcon(QPixmap(icon)))
+
 
 
 class AppRunner(QRunnable):

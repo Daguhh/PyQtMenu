@@ -81,7 +81,7 @@ def txt2fct(command_path):
         os.system(command_path)
     return exec
 
-def icon2path(icon_name):
+def icon2path(icon_name, theme):
     """
     return icon path from icon_name :
         - if icon_name is path to icon, do nothing
@@ -93,7 +93,7 @@ def icon2path(icon_name):
     elif os.path.isfile(icon_name):
         icon_path = icon_name
     else:
-        for t, s, p in product(ICON_THEME, ICON_SIZES, ICON_PATHS):
+        for t, s, p in product(ICON_THEME[theme], ICON_SIZES, ICON_PATHS):
             icon_tmp = glob.glob(f'{p}/{t}/{s}x{s}/*/{icon_name}.*')
             if icon_tmp:
                 icon_path = icon_tmp[0]
@@ -153,7 +153,7 @@ def parse_desktop_lang(file_name, lang='fr'):
 
 
     #app['Exec'] = txt2fct(app['Exec'])
-    app['Icon'] = icon2path(app['Icon'])
+    #app['Icon'] = icon2path(app['Icon'], theme='hicolor')
     return app
 
 def parse_desktop(file_name):

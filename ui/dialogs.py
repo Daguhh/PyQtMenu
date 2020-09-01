@@ -10,6 +10,10 @@ from PyQt5.QtWidgets import (
 )
 
 
+class IconThemeChoose(QDialog):
+    """ Dialog popup to chose an Icon """
+    pass
+
 class AskMultipleValues(QDialog):
     """ Dialog to resize icon """
 

@@ -7,7 +7,12 @@ CONFIG_PATH = f"{HOME}/.config/pyqtmenu/"
 APP_SAVE_FILE = "app_save.json"
 
 ICON_PATHS = [f'{HOME}/.local/share/icons', '/usr/share/icons/']
-ICON_THEME = ['hicolor', 'oxygen/base']
+ICON_THEME = {
+    'hicolor' : ['hicolor', 'oxygen/base', 'Moka', 'Faba'],
+    'Moka' : ['Moka', 'oxygen/base', 'hicolor', 'Faba'],
+    'Oxygen' : ['oxygen/base', 'hicolor'],
+    'Faba' : ['Faba', 'hicolor'],
+}
 ICON_SIZES = [512, 310, 256, 192, 150, 128, 96, 72, 64, 48, 44, 42, 36, 32, 24, 22, 16, 8]
 ICON_DEFAULT = "/Apps_example/EmptyApp/empty.png"
 
