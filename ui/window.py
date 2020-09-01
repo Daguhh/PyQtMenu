@@ -13,6 +13,7 @@ import os
 from itertools import product, count
 import sip
 import subprocess
+import time
 
 from PyQt5.QtCore import QSize
 from PyQt5.QtCore import Qt, QByteArray
@@ -48,7 +49,7 @@ from .parse_desktop_file import get_app_from_desktop, parse_desktop_lang
 from .qss import APP_BUTTON_QSS, APP_LABEL_QSS, APP_LAUNCHER_QSS
 from .layout_manager.layout_manager_tab import LayoutMgr
 from .dialogs import AskMultipleValues
-from config import DUAL_PANEL_ICON, REDUCE_ICON, MENU_TITLE, USER_CONFIG
+from config import DUAL_PANEL_ICON, REDUCE_ICON, MENU_TITLE, USER_CONFIG, CONFIG_PATH, DEFAULT_CONF_INI, APP_SAVE_FILE
 from load_config import CONFIG
 
 def iconFromBase64(base64):
@@ -56,6 +57,27 @@ def iconFromBase64(base64):
     pixmap.loadFromData(QByteArray.fromBase64(base64))
     icon = QIcon(pixmap)
     return icon
+
+def restart_program():
+
+    python = sys.executable
+    os.execl(python, python, * sys.argv)
+
+def make_configs():
+
+    print('=========== make conf ====================')
+
+    print(DEFAULT_CONF_INI)
+    print(USER_CONFIG)
+    if not os.path.isdir(CONFIG_PATH):
+        os.makedirs(CONFIG_PATH)
+    if not os.path.exists(USER_CONFIG):
+        with open(USER_CONFIG, 'w') as user_conf:
+            print(DEFAULT_CONF_INI)
+            user_conf.write(DEFAULT_CONF_INI)
+        restart_program()
+    if not os.path.exists(APP_SAVE_FILE):
+        pass
 
 class MainWindow(QMainWindow):
 
@@ -67,9 +89,14 @@ class MainWindow(QMainWindow):
         self.title = MENU_TITLE
         self.setWindowTitle(self.title)
         MainWindow.instance = self
+
+        make_configs()
+
         x = int(CONFIG['Window']['x'])
         y = int(CONFIG['Window']['y'])
         self.resize(x,y)
+
+
 
         self.initUI()
         self.enable_modules()
