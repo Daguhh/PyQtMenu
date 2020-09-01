@@ -45,11 +45,11 @@ from PyQt5.QtWidgets import (
     QMessageBox,
 )
 
-from .parse_desktop_file import get_app_from_desktop, parse_desktop_lang, icon2path
+from .parse_desktop_file import get_app_from_desktop, parse_desktop_lang
 from .qss import APP_BUTTON_QSS, APP_LABEL_QSS, APP_LAUNCHER_QSS
 from .layout_manager.layout_manager_tab import LayoutMgr
 from .dialogs import AskMultipleValues
-from .config import DUAL_PANEL_ICON, REDUCE_ICON, ICON_THEME
+from .config import DUAL_PANEL_ICON, REDUCE_ICON, ICON_THEMES
 
 def iconFromBase64(base64):
     pixmap = QPixmap()
@@ -96,7 +96,7 @@ class MainWindow(QMainWindow):
         themeMenu = EditMenu.addMenu("Icon theme")
 
         # Change icon theme
-        for theme in ICON_THEME.keys():
+        for theme in ICON_THEMES.keys():
             iconAct = QAction(text=theme, parent=self)
             iconAct.triggered.connect(self.set_icon_theme)
             themeMenu.addAction(iconAct)
@@ -405,8 +405,8 @@ class AppLauncherBtn(QFrame):
         self.setFixedSize(size[0] + 20, size[1] + 35)
         self.setStyleSheet(APP_LAUNCHER_QSS)
 
-        name, self.icon, tooltip = app["Name"], app["Icon"], app["Comment"]
-        icon = icon2path(self.icon, 'Moka')
+        name, self.icons, tooltip = app["Name"], app["Icon"], app["Comment"]
+        icon = self.icons['Moka']
 
         self.btn = QPushButton()
         self.btn.setIcon(QIcon(QPixmap(icon)))
@@ -450,7 +450,7 @@ class AppLauncherBtn(QFrame):
 
     def set_icon_theme(self, theme):
 
-        icon = icon2path(self.icon, theme)
+        icon = self.icons[theme]
         self.btn.setIcon(QIcon(QPixmap(icon)))
 
 

@@ -6,8 +6,8 @@ HOME = os.getenv("HOME")
 CONFIG_PATH = f"{HOME}/.config/pyqtmenu/"
 APP_SAVE_FILE = "app_save.json"
 
-ICON_PATHS = [f'{HOME}/.local/share/icons', '/usr/share/icons/']
-ICON_THEME = {
+ICON_PATHS = [f'{HOME}/.local/share/icons', '/usr/share/icons']
+ICON_THEMES = {
     'hicolor' : ['hicolor', 'oxygen/base', 'Moka', 'Faba'],
     'Moka' : ['Moka', 'oxygen/base', 'hicolor', 'Faba'],
     'Oxygen' : ['oxygen/base', 'hicolor'],
@@ -15,6 +15,7 @@ ICON_THEME = {
 }
 ICON_SIZES = [512, 310, 256, 192, 150, 128, 96, 72, 64, 48, 44, 42, 36, 32, 24, 22, 16, 8]
 ICON_DEFAULT = "/Apps_example/EmptyApp/empty.png"
+ICON_DEFAULT_DCT = {theme:ICON_DEFAULT for theme in ICON_THEMES.keys()}
 
 MENU_NAME = "pyqtmenu"
 MENU_TITLE = "PyQtMenu"

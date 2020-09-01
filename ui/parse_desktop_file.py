@@ -14,7 +14,7 @@ import json
 
 
 from .config import (
-    ICON_PATHS, ICON_THEME, ICON_SIZES, ICON_DEFAULT,
+    ICON_PATHS, ICON_THEMES, ICON_SIZES, ICON_DEFAULT_DCT,
     CONFIG_PATH, APP_SAVE_FILE
 )
 
@@ -41,8 +41,6 @@ def get_app_from_desktop():
         with open(app_config_file) as json_data_file:
             saved_app = json.load(json_data_file)
     except FileNotFoundError as e:
-        print(e)
-        print('hahaha')
         saved_app = {}
 
     app_list = []
@@ -52,14 +50,15 @@ def get_app_from_desktop():
     for file in glob.iglob(path_desktop):
 
         hex_hash = hash_file(file)
+        # if new launcher : parse .desktop
         if not hex_hash in list(saved_app.keys()):
 
             app = parse_desktop_lang(file)
 
             category = file.split('/')[-2]
             app['category'] = category
-            print('par là!!!!!!!!!!!!!!!!!!!!!!!')
-
+            app['Icon']  = icon2paths(app['Icon']).copy()
+        # else load from json conf
         else:
             app = saved_app[hex_hash]
 
@@ -81,28 +80,30 @@ def txt2fct(command_path):
         os.system(command_path)
     return exec
 
-def icon2path(icon_name, theme):
+def icon2paths(icon_name):
     """
     return icon path from icon_name :
         - if icon_name is path to icon, do nothing
         - if not look for icon in file system
     """
-    icon_path = ICON_DEFAULT
+    icon_path = ICON_DEFAULT_DCT
     if not icon_name:
         pass
     elif os.path.isfile(icon_name):
-        icon_path = icon_name
+        for theme in ICON_THEMES.keys():
+            icon_path[theme] = icon_name
     else:
-        for t, s, p in product(ICON_THEME[theme], ICON_SIZES, ICON_PATHS):
-            icon_tmp = glob.glob(f'{p}/{t}/{s}x{s}/*/{icon_name}.*')
-            if icon_tmp:
-                icon_path = icon_tmp[0]
-                break
+        for theme, theme_paths in ICON_THEMES.items():
+            for t, s, p in product(theme_paths, ICON_SIZES, ICON_PATHS):
+                icon_tmp = glob.glob(f'{p}/{t}/{s}x{s}/*/{icon_name}.*')
+                if icon_tmp:
+                    icon_path[theme] = icon_tmp[0]
+                    break
+    #print('***********************')
+    #print(icon_path)
     return icon_path
 
             #icon = glob.glob(f'/usr/share/icons/hicolor/128x128/*/{icon}.*')[0]
-
-    return icon
 
 def create_pattern(entry, lang=None):
     if lang != None:
@@ -151,9 +152,9 @@ def parse_desktop_lang(file_name, lang='fr'):
 
         app[name] = match
 
+    #print(app['Icon'])
 
-    #app['Exec'] = txt2fct(app['Exec'])
-    #app['Icon'] = icon2path(app['Icon'], theme='hicolor')
+
     return app
 
 def parse_desktop(file_name):
