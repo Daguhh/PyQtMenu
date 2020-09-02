@@ -1,0 +1,12 @@
+./pyqtmenu-start
+./pyqtmenu.desktop
+./pyqtmenu/config.py
+./pyqtmenu/dialogs.py
+./pyqtmenu/parse_desktop_file.py
+./pyqtmenu/pyqtmenu.py
+./pyqtmenu/qss.py
+./pyqtmenu/window.py
+./pyqtmenu/layout_manager/__init__.py
+./pyqtmenu/layout_manager/layout_manager.py
+./pyqtmenu/layout_manager/layout_manager_tab.py
+./pyqtmenu/app_example

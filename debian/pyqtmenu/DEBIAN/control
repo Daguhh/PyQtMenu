@@ -1,0 +1,14 @@
+Package: pyqtmenu
+Version: 0.1-1
+Architecture: amd64
+Maintainer: Daguhh <code.daguhh@zaclys.net>
+Installed-Size: 151
+Depends: python3:any
+Section: x11
+Priority: optional
+Homepage: <https://github.com/Daguhh/PyQtMenu>
+Description: A simple menu to display your apps
+    Un menu pour organiser vos applications et lancer vos scripts.
+    Configuration simple par fichiers textes ou via l'interface
+    Avec le module pour i3wm, profitez d'une vue à deux panneaux
+    et organisez facilement vois fenêtres

@@ -1,0 +1,19 @@
+Source: pyqtmenu
+Section: x11
+Priority: optional
+Standards-Version: 4.5.0
+Maintainer: Daguhh <code.daguhh@zaclys.net>
+Build-Depends: debhelper-compat (= 13), python3
+Rules-Requires-Root: no
+
+Package: pyqtmenu
+Architecture: any
+Homepage: <https://github.com/Daguhh/PyQtMenu>
+X-Python3-Version: >=3.6
+Depends: ${python3:Depends}, ${python3-pyqt5:Depends}
+Description: A simple menu to display your apps
+    Un menu pour organiser vos applications et lancer vos scripts.
+    Configuration simple par fichiers textes ou via l'interface
+    Avec le module pour i3wm, profitez d'une vue à deux panneaux
+    et organisez facilement vois fenêtres
+

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Appli-Exemple
+Type=Application
+Comment=Ceci est un exemple d application
+Exec=/usr/share/pyqtmenu/app_example/empty
+TryExec=/usr/share/pyqtmenu/app_example/empty
+Icon=/usr/share/pyqtmenu/app_example/empty.png
+Keywords=NoneA

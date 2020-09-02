@@ -1,8 +1,0 @@
-[Desktop Entry]
-Name=Exiftool
-Type=Application
-Comment=delete metadata or rename file with exif
-Exec=Apps_example/ExifManipulation/delete_metadata
-TryExec=Apps_example/ExifManipulation/delete_metadata
-Icon=Apps_example/ExifManipulation/delete_metadata.png
-Keywords=exiftool; rename; delete; metadata 

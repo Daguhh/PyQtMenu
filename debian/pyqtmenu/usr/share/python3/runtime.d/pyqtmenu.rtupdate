@@ -1,0 +1,7 @@
+#! /bin/sh
+set -e
+
+if [ "$1" = rtupdate ]; then
+	py3clean -p pyqtmenu /usr/share/pyqtmenu
+	py3compile -p pyqtmenu  /usr/share/pyqtmenu
+fi

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=PyQtMenu
+Comment=Simple menu for debian
+Comment[fr]=Menu simple pour debian
+Exec=/usr/bin/pyqtmenu-start
+Path=/usr/share/pyqtmenu
+Icon=pyqtmenu
+StartupNotify=true
+Terminal=false
+Type=Application
+Categories=Utility;

@@ -1,0 +1,12 @@
+pyqtmenu-start /usr/bin
+pyqtmenu.desktop /usr/share/applications/
+pyqtmenu/config.py /usr/share/pyqtmenu
+pyqtmenu/dialogs.py /usr/share/pyqtmenu
+pyqtmenu/parse_desktop_file.py /usr/share/pyqtmenu
+pyqtmenu/pyqtmenu.py /usr/share/pyqtmenu
+pyqtmenu/qss.py /usr/share/pyqtmenu
+pyqtmenu/window.py /usr/share/pyqtmenu
+pyqtmenu/layout_manager/__init__.py /usr/share/pyqtmenu/layout_manager
+pyqtmenu/layout_manager/layout_manager.py /usr/share/pyqtmenu/layout_manager
+pyqtmenu/layout_manager/layout_manager_tab.py /usr/share/pyqtmenu/layout_manager
+pyqtmenu/app_example /usr/share/pyqtmenu/
