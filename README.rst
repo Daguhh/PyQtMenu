@@ -16,7 +16,15 @@ new :
           :width: 200px
           :align: center
           :alt: PyQtMenu preview
-  
+
+Usage
+#####
+
+Just run::
+
+  ./pyqtmenu.py
+
+
 Add a launcher
 ###############
 
@@ -34,9 +42,28 @@ Put it under::
 
 or drag 'n' drop it to the wanted category tab
 
-Usage
-#####
+Configuration :
+###############
 
-Just run::
+Graphically
+-----------
 
-  ./pyqtmenu.py
+You can configure the menu by the interface (add icon, change icon size/theme)
+when you're happy whith your save it (Fichier > save)
+
+Text file :
+-----------
+
+All configurations can be found in::
+
+  ~/.config/pyqtmenu
+  
+============= ====================================  
+file          description   
+============= ====================================  
+Apps/          category/my_app.desktop location  
+------------- ------------------------------------
+app_save.json cache file for .desktop   
+------------- ------------------------------------
+config.ini    User configuration file   
+============= ====================================  
