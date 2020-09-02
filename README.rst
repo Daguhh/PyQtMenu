@@ -49,7 +49,8 @@ Graphically
 -----------
 
 You can configure the menu by the interface (add icon, change icon size/theme)
-when you're happy whith your save it (Fichier > save)
+
+when you're happy with your save it (Fichier > save)
 
 Text file :
 -----------
