@@ -6,10 +6,10 @@ df1ca0b28069df5bcba99519f0e686d8  usr/lib/python3/dist-packages/pyqtmenu/dialogs
 d41d8cd98f00b204e9800998ecf8427e  usr/lib/python3/dist-packages/pyqtmenu/layout_manager/__init__.py
 54f39cd1b216f7c505af25447d1746a8  usr/lib/python3/dist-packages/pyqtmenu/layout_manager/layout_manager.py
 8145eda964506278c3f432b997301cd4  usr/lib/python3/dist-packages/pyqtmenu/layout_manager/layout_manager_tab.py
-bdbf4cf47bb6995c0894074d37bff3df  usr/lib/python3/dist-packages/pyqtmenu/parse_desktop_file.py
+985d030e3b9b6f422bef54d06df86539  usr/lib/python3/dist-packages/pyqtmenu/parse_desktop_file.py
 8d1d47e9681c0dceeb5bc05ab7f2e7c0  usr/lib/python3/dist-packages/pyqtmenu/pyqtmenu.py
 bfe41f317521d2b218c78da2d7f0b1bc  usr/lib/python3/dist-packages/pyqtmenu/qss.py
-e6a2b97de4a3989dfc40a182f0b5e8e0  usr/lib/python3/dist-packages/pyqtmenu/window.py
+7b96ebdeb795c377b73ee33e911a5969  usr/lib/python3/dist-packages/pyqtmenu/window.py
 88299e77b6293bb8778cd609267db3be  usr/share/applications/pyqtmenu.desktop
 0173418dad1a9e654631c9009ddf497f  usr/share/doc/pyqtmenu/changelog.Debian.gz
 b27a740d024f72850d048ef41e23b20e  usr/share/doc/pyqtmenu/copyright
@@ -24,8 +24,8 @@ df1ca0b28069df5bcba99519f0e686d8  usr/share/pyqtmenu/dialogs.py
 d41d8cd98f00b204e9800998ecf8427e  usr/share/pyqtmenu/layout_manager/__init__.py
 54f39cd1b216f7c505af25447d1746a8  usr/share/pyqtmenu/layout_manager/layout_manager.py
 8145eda964506278c3f432b997301cd4  usr/share/pyqtmenu/layout_manager/layout_manager_tab.py
-bdbf4cf47bb6995c0894074d37bff3df  usr/share/pyqtmenu/parse_desktop_file.py
+985d030e3b9b6f422bef54d06df86539  usr/share/pyqtmenu/parse_desktop_file.py
 0383bb7637582fe1f7744ef3abb0a1cc  usr/share/pyqtmenu/pyqtmenu.py
 bfe41f317521d2b218c78da2d7f0b1bc  usr/share/pyqtmenu/qss.py
-464538100a121431782f866f72088021  usr/share/pyqtmenu/window.py
+726cfe7772021a257e4a902ac74cc7a4  usr/share/pyqtmenu/window.py
 ec1d680a9dbe2a63a978a1ca4f9d3281  usr/share/python3/runtime.d/pyqtmenu.rtupdate

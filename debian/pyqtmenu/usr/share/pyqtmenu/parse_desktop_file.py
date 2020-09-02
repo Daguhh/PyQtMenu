@@ -129,6 +129,14 @@ def find_in_file(file, pattern):
                 break
     return match
 
+def get_dropped_desktop(file_name, lang='fr'):
+
+    app = parse_desktop_lang(file_name, lang)
+    app['Icon']  = icon2paths(app['Icon']).copy()
+    app['Exec'] = txt2fct(app['Exec'])
+
+    return app
+
 def parse_desktop_lang(file_name, lang='fr'):
     """
     parse_desktop("fichier.desktop") => dict
