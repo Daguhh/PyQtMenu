@@ -30,7 +30,7 @@ You should have a .desktop file with the following entries::
 
 Put it under::
 
-  Apps/your_catergory/my_app.desktop
+  ~/.config/pyqtmenu/Apps/your_catergory/my_app.desktop
 
 or drag 'n' drop it to the wanted category tab
 
@@ -39,4 +39,4 @@ Usage
 
 Just run::
 
-  ./pyqtmenu
+  ./pyqtmenu.py
