@@ -43,7 +43,7 @@ from PyQt5.QtWidgets import (
 )
 
 # Local
-from parse_desktop_file import get_app_from_desktop, parse_desktop_lang
+from parse_desktop_file import get_app_from_desktop, parse_desktop_lang, get_dropped_desktop
 import qss as qss
 from layout_manager.layout_manager_tab import LayoutMgr
 from dialogs import AskMultipleValues
@@ -446,9 +446,9 @@ class Tab(QWidget):
         """ As desktop file is dropped on a tab, create a new launcher """
 
         file_path = e.mimeData().urls()[0].path()  # split('//')[1:][0]
-        app = parse_desktop_lang(file_path)
+        app = get_dropped_desktop(file_path)
         file_name = file_path.split("/")[-1]
-        os.system(f"cp {file_path} Apps/{self.category}/{file_name}")
+        os.system(f"cp {file_path} {cf.DESKTOP_FILES_PATH}/{self.category}/{file_name}")
         self.addLauncher(app)
 
 
@@ -463,8 +463,14 @@ class AppLauncherBtn(QFrame):
         self.setFixedSize(size[0] + 20, size[1] + 35)
         self.setStyleSheet(qss.APP_LAUNCHER_QSS)
 
+        print('========================')
+        print(app)
+        print('--------------------------')
         name, self.icons, tooltip = app["Name"], app["Icon"], app["Comment"]
+        print(self.icons)
+        print(cf.CONFIG["Icon"]["theme"])
         icon = self.icons[cf.CONFIG["Icon"]["theme"]]
+        print(icon)
 
         self.btn = QPushButton()
         self.btn.setIcon(QIcon(QPixmap(icon)))
@@ -547,8 +553,7 @@ def make_configs():
     if not os.path.isdir(cf.CONFIG_PATH):
         os.makedirs(cf.CONFIG_PATH)
         os.system(f"cp -R {cf.APP_TAB_EXAMPLE} {cf.DESKTOP_FILES_PATH}/")
-        os.system(f"cp -R {cf.APP_TAB_EXAMPLE} {cf.DESKTOP_FILES_PATH}/")
-        
+
     if not os.path.exists(cf.USER_CONFIG):
         with open(cf.USER_CONFIG, "w") as user_conf:
             user_conf.write(cf.DEFAULT_CONF_INI)
