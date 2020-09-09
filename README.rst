@@ -1,3 +1,10 @@
+
+|badge_MIT| |badge_python| |badge_download|
+
+.. |badge_MIT| image:: https://img.shields.io/badge/License-MIT-blue.svg 
+.. |badge_download| image:: https://img.shields.io/github/downloads/Naereen/StrapDown.js/total.svg 
+.. |badge_python| image:: https://img.shields.io/badge/Made%20with-Python-1f425f.svg
+
 ********
 PyQtMenu
 ********
